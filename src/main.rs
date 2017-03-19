@@ -54,7 +54,11 @@ fn main() {
         let mut source_buffer = String::new();
         source_file.read_to_string(&mut source_buffer).unwrap();
 
-        println!("=> {}", source_buffer)
+        println!("=> ");
+
+        for t in lexer::tokenize(&source_buffer) {
+            println!("{:?}", t)
+        }
         
     } else {
         repl_loop();
