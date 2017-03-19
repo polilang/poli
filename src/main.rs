@@ -2,15 +2,16 @@ use std::io;
 use std::io::prelude::*;
 
 use std::fs::File;
-
 use std::env;
+
+mod parser;
+use parser::lexer;
 
 fn repl_loop() {
     println!("the poli language\n");
 
     loop {
         print!(">>> ");
-
         io::stdout().flush().unwrap();
 
         let mut input_line = String::new();
@@ -25,7 +26,13 @@ fn repl_loop() {
                     std::process::exit(0)
                 }
 
-                println!("=> {}", input_line.trim());
+                println!("=> ");
+
+                for t in lexer::tokenize(&input_line) {
+                    println!("{:?}", t)
+                }
+
+                println!()
             },
 
             Err(e) => panic!(e),
