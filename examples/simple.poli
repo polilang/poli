@@ -1,0 +1,10 @@
+Apple:
+	new =:
+		.size = "v big and juicy"
+		.name = "sabri"
+
+	make_greeting = name :
+		print "yes hello, " + name
+
+apple? = Apple()
+apple.make_greeting "niql"

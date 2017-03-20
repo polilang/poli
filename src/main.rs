@@ -76,7 +76,7 @@ fn run_file(path: &str) {
     println!("=> ");
 
     for t in lexer::tokenize(&source_buffer) {
-        println!("{:?}", t)
+        println!("{:?}", t.token_type)
     }
 }
 
