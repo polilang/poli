@@ -5,8 +5,7 @@ pub enum TokenType {
     Identifier(String),
     
     StringLiteral(String),
-    IntegerLiteral(String),
-    FloatLiteral(String),
+    NumberLiteral(String),
     
     Colon,
     Semicolon,
@@ -20,6 +19,8 @@ pub enum TokenType {
     LBracket,
     RBracket,
 
+    Assign,
+
     If,
     Else,
     For,
@@ -27,7 +28,7 @@ pub enum TokenType {
     Return,
     Bool(bool),
 
-    BinaryOp,
+    BinaryOp((BinaryOp, u8)),
 
     Invalid,
 }
@@ -42,8 +43,8 @@ pub enum BinaryOp {
     NotEquals,
     Lt,
     Gt,
-    LtEqual,
-    GtEqual,
+    LtEquals,
+    GtEquals,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -119,10 +120,48 @@ impl<'a> Lexer<'a> {
                 break
             }
 
-            self.move_forward();
+            self.move_forward(1);
         }
 
         &self.source[self.token_pos .. self.pos]
+    }
+
+    fn lex_number(&mut self) -> &str {
+        while let Some(c) = self.current {
+            if !c.is_digit(10) && c != '.' {
+                break
+            }
+
+            self.move_forward(1);
+        }
+
+        &self.source[self.token_pos .. self.pos]
+    }
+
+    fn lex_bin_op(&mut self) -> String {
+        let mut accum  = 2; // max operand length
+        let mut buffer = String::new();
+
+        while let Some(c) = self.current {
+            if accum == 0 {
+                break
+            }
+
+            buffer.push(c);
+            accum -= 1;
+
+            match bin_op(&buffer) {
+                Some(_) => {
+                    self.move_forward(2 - accum);
+                    break
+                },
+                None    => (),
+            }
+
+            self.move_forward(1);
+        }
+
+        buffer
     }
 
     fn lex_string(&mut self) -> String {
@@ -134,7 +173,7 @@ impl<'a> Lexer<'a> {
                 None    => panic!("opened string is unterminated"),
             };
 
-            self.move_forward();
+            self.move_forward(1);
 
             match c {
                 '\\' => {
@@ -143,7 +182,7 @@ impl<'a> Lexer<'a> {
                         None    => continue,
                     };
 
-                    self.move_forward();
+                    self.move_forward(1);
 
                     buffer.push(match escaped {
                         '"' | '\\' => escaped,
@@ -170,16 +209,29 @@ impl<'a> Lexer<'a> {
                 break
             }
 
-            self.move_forward()
+            self.move_forward(1)
         }
     }
 
-    fn move_forward(&mut self) {
-        if let Some(c) = self.current {
-            self.pos += c.len_utf8();
-            self.current    = self.char_at(self.pos);
-        } else {
-            panic!("lexer lexing too far")
+    fn move_forward(&mut self, delta: usize) {
+        for _ in 0 .. delta {
+            if let Some(c) = self.current {
+                self.pos += c.len_utf8();
+                self.current = self.char_at(self.pos);
+            } else {
+                panic!("lexer lexing too far")
+            }
+        }
+    }
+
+    fn move_backward(&mut self, delta: usize) {
+        for _ in 0 .. delta {
+            if let Some(c) = self.current {
+                self.pos -= c.len_utf8();
+                self.current = self.char_at(self.pos);
+            } else {
+                panic!("lexer lexing too far")
+            }
         }
     }
 
@@ -204,28 +256,44 @@ impl<'a> Iterator for Lexer<'a> {
         let token_type = if c.is_alphabetic() {
             match self.lex_term() {
                 "if"     => TokenType::If,
+                "else"   => TokenType::Else,
                 "for"    => TokenType::For,
                 "true"   => TokenType::Bool(true),
                 "false"  => TokenType::Bool(false),
                 "return" => TokenType::Return,
+                "this"   => TokenType::This,
                 _        => TokenType::Identifier(
                                 String::from(self.lex_term())
                             ),
             }
+        } else if c.is_digit(10) {
+            TokenType::NumberLiteral(
+                String::from(self.lex_number())
+            )
         } else {
-            self.move_forward();
+            match bin_op(&self.lex_bin_op()) {
+                Some(o) => TokenType::BinaryOp(o),
+                None    => {
+                    self.move_backward(1);
 
-            match c {
-                '"' => TokenType::StringLiteral(
-                           String::from(self.lex_string())
-                       ),
-                '['  => TokenType::LBracket,
-                ']'  => TokenType::RBracket,
-                '('  => TokenType::LParen,
-                ')'  => TokenType::RParen,
-                '{'  => TokenType::LBrace,
-                '}'  => TokenType::RBrace,
-                _    => TokenType::Invalid,
+                    match c {
+                        '"' => TokenType::StringLiteral(
+                                    String::from(self.lex_string())
+                                ),
+                        '['  => TokenType::LBracket,
+                        ']'  => TokenType::RBracket,
+                        '('  => TokenType::LParen,
+                        ')'  => TokenType::RParen,
+                        '{'  => TokenType::LBrace,
+                        '}'  => TokenType::RBrace,
+                        ','  => TokenType::Comma,
+                        ':'  => TokenType::Colon,
+                        ';'  => TokenType::Semicolon,
+                        '.'  => TokenType::Period,
+                        '='  => TokenType::Assign,
+                        _    => TokenType::Invalid
+                    }
+                },
             }
         };
 
@@ -240,4 +308,20 @@ pub fn tokenize(source: &str) -> Vec<Token> {
 fn identifier_worthy(c: char) -> bool {
     c.is_alphabetic() || c == '_'
                       || c == '?'
+}
+
+fn bin_op(v: &str) -> Option<(BinaryOp, u8)> {
+    match v {
+        "*"  => Some((BinaryOp::Mul, 1)),
+        "/"  => Some((BinaryOp::Div, 1)),
+        "+"  => Some((BinaryOp::Plus, 2)),
+        "-"  => Some((BinaryOp::Minus, 2)),
+        "==" => Some((BinaryOp::Equals, 4)),
+        "~=" => Some((BinaryOp::NotEquals, 4)),
+        "<"  => Some((BinaryOp::Lt, 4)),
+        ">"  => Some((BinaryOp::Gt, 4)),
+        "<=" => Some((BinaryOp::GtEquals, 4)),
+        ">=" => Some((BinaryOp::LtEquals, 4)),
+        _    => None,
+    }
 }
