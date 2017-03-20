@@ -1,3 +1,7 @@
+extern crate docopt;
+
+use docopt::Docopt;
+
 use std::io;
 use std::io::prelude::*;
 
@@ -7,7 +11,27 @@ use std::env;
 mod parser;
 use parser::lexer;
 
-fn repl_loop() {
+const USAGE: &'static str = "
+the poli language
+
+usage:
+    poli run <source>
+    poli build <source> [--optimize]
+    poli new <project name>
+    poli repl
+    poli (-h | --help)
+    poli --version
+
+    poli lexer <source>
+    poli ast <source>
+
+options:
+    -h --help   show this message
+    --version   show compiler version
+    --optimize  optimize compiled LLVM IR
+";
+
+fn run_repl() {
     println!("the poli language\n");
 
     loop {
@@ -29,7 +53,7 @@ fn repl_loop() {
                 println!("=> ");
 
                 for t in lexer::tokenize(&input_line) {
-                    println!("{:?}", t)
+                    println!("{:?}", t.token_type)
                 }
 
                 println!()
@@ -40,27 +64,34 @@ fn repl_loop() {
     }
 }
 
+fn run_file(path: &str) {
+    let mut source_file = match File::open(path) {
+        Ok(f)  => f,
+        Err(_) => panic!("failed to open path: {}", path),
+    };
+
+    let mut source_buffer = String::new();
+    source_file.read_to_string(&mut source_buffer).unwrap();
+
+    println!("=> ");
+
+    for t in lexer::tokenize(&source_buffer) {
+        println!("{:?}", t)
+    }
+}
+
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
 
-    if args.len() > 1 {
-        let path = &args[1];
+    let argv: Vec<String> = env::args().collect();
 
-        let mut source_file = match File::open(path) {
-            Ok(f)  => f,
-            Err(_) => panic!("failed to open path: {}", path),
-        };
+    let args = Docopt::new(USAGE)
+                       .and_then(|d| d.argv(argv.into_iter()).parse())
+                       .unwrap_or_else(|e| e.exit());
 
-        let mut source_buffer = String::new();
-        source_file.read_to_string(&mut source_buffer).unwrap();
-
-        println!("=> ");
-
-        for t in lexer::tokenize(&source_buffer) {
-            println!("{:?}", t)
-        }
-        
-    } else {
-        repl_loop();
+    if args.get_bool("repl") {
+        run_repl()
+    } else if args.get_bool("run") {
+        run_file(args.get_str("<source>"))
     }
 }
