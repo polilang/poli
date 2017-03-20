@@ -4,9 +4,9 @@ use std::ops::Range;
 pub enum TokenType {
     Identifier(String),
     
-    StringLiteral,
-    IntegerLiteral,
-    FloatLiteral,
+    StringLiteral(String),
+    IntegerLiteral(String),
+    FloatLiteral(String),
     
     Colon,
     Semicolon,
@@ -19,6 +19,13 @@ pub enum TokenType {
     RBrace,
     LBracket,
     RBracket,
+
+    If,
+    Else,
+    For,
+    This,
+    Return,
+    Bool(bool),
 
     BinaryOp,
 
@@ -106,7 +113,7 @@ impl<'a> Lexer<'a> {
         lexer
     }
 
-    fn lex_identifier(&mut self) -> String {
+    fn lex_term(&mut self) -> &str {
         while let Some(c) = self.current {
             if !(identifier_worthy(c) || c.is_digit(10)) {
                 break
@@ -115,7 +122,46 @@ impl<'a> Lexer<'a> {
             self.move_forward();
         }
 
-        String::from(&self.source[self.token_pos .. self.pos])
+        &self.source[self.token_pos .. self.pos]
+    }
+
+    fn lex_string(&mut self) -> String {
+        let mut buffer = String::new();
+
+        loop {
+            let c = match self.current {
+                Some(c) => c,
+                None    => panic!("opened string is unterminated"),
+            };
+
+            self.move_forward();
+
+            match c {
+                '\\' => {
+                    let escaped = match self.current {
+                        Some(e) => e,
+                        None    => continue,
+                    };
+
+                    self.move_forward();
+
+                    buffer.push(match escaped {
+                        '"' | '\\' => escaped,
+                        't'         => '\t',
+                        'n'         => '\n',
+                        'r'         => '\r',
+                        c           => {
+                            panic!("invalid escaped character: {:?}", c)
+                        },
+                    })
+                },
+
+                '"'  => break,
+                c    => buffer.push(c),
+            }
+        }
+
+        buffer
     }
 
     fn move_whitespace(&mut self) {
@@ -156,11 +202,31 @@ impl<'a> Iterator for Lexer<'a> {
         };
 
         let token_type = if c.is_alphabetic() {
-            TokenType::Identifier(self.lex_identifier())
+            match self.lex_term() {
+                "if"     => TokenType::If,
+                "for"    => TokenType::For,
+                "true"   => TokenType::Bool(true),
+                "false"  => TokenType::Bool(false),
+                "return" => TokenType::Return,
+                _        => TokenType::Identifier(
+                                String::from(self.lex_term())
+                            ),
+            }
         } else {
             self.move_forward();
 
-            TokenType::Invalid
+            match c {
+                '"' => TokenType::StringLiteral(
+                           String::from(self.lex_string())
+                       ),
+                '['  => TokenType::LBracket,
+                ']'  => TokenType::RBracket,
+                '('  => TokenType::LParen,
+                ')'  => TokenType::RParen,
+                '{'  => TokenType::LBrace,
+                '}'  => TokenType::RBrace,
+                _    => TokenType::Invalid,
+            }
         };
 
         Some(Token::new(token_type, self.token_pos, self.pos))
