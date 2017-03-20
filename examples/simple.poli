@@ -7,4 +7,4 @@ Apple:
 		print "yes hello, " + name
 
 apple? = Apple()
-apple.make_greeting "niql"
+apple?.make_greeting "niql"
