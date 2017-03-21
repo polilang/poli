@@ -1,4 +1,10 @@
 use std::ops::Range;
+use parser::block_tree::{
+    BlockTree,
+    Branch,
+    ChunkContent,
+    Chunk,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TokenType {
@@ -114,6 +120,44 @@ impl<'a> Lexer<'a> {
         lexer
     }
 
+    pub fn tokenize(source: &str) -> Vec<Token> {
+        Self::new(source).collect()
+    }
+
+    pub fn tokenize_branch(branch: &Branch<'a>) -> Branch<'a> {
+        let mut branch_ret = Branch {
+            content: Vec::new(),
+        };
+
+        for chunk in branch.content.iter() {
+            match chunk.content {
+                ChunkContent::Text(t) => {
+                    branch_ret.content.push(
+                        Chunk {
+                            content: ChunkContent::Tokens(
+                                Box::new(Self::tokenize(t)),
+                            ),
+                        },
+                    );
+                },
+
+                ChunkContent::Block(ref b) => {
+                    branch_ret.content.push(
+                        Chunk {
+                            content: ChunkContent::Block(
+                                Box::new(Self::tokenize_branch(b)),
+                            ),
+                        },
+                    );
+                },
+
+                _ => continue,
+            }
+        }
+
+        branch_ret
+    }
+
     fn lex_term(&mut self) -> &str {
         while let Some(c) = self.current {
             if !(identifier_worthy(c) || c.is_digit(10)) {
@@ -219,7 +263,7 @@ impl<'a> Lexer<'a> {
                 self.pos += c.len_utf8();
                 self.current = self.char_at(self.pos);
             } else {
-                panic!("lexer lexing too far")
+                panic!("lexer lexing too far forward")
             }
         }
     }
@@ -230,7 +274,7 @@ impl<'a> Lexer<'a> {
                 self.pos -= c.len_utf8();
                 self.current = self.char_at(self.pos);
             } else {
-                panic!("lexer lexing too far")
+                panic!("lexer lexing too far backward")
             }
         }
     }
@@ -274,12 +318,15 @@ impl<'a> Iterator for Lexer<'a> {
             match bin_op(&self.lex_bin_op()) {
                 Some(o) => TokenType::BinaryOp(o),
                 None    => {
-                    self.move_backward(1);
 
                     match c {
-                        '"' | '\'' => TokenType::StringLiteral(
-                                    String::from(self.lex_string('\''))
-                                ),
+                        '"' | '\'' =>  {
+                            self.move_backward(1);
+
+                            TokenType::StringLiteral(
+                                String::from(self.lex_string(c))
+                            )
+                        },
                         '['  => TokenType::LBracket,
                         ']'  => TokenType::RBracket,
                         '('  => TokenType::LParen,
@@ -299,10 +346,6 @@ impl<'a> Iterator for Lexer<'a> {
 
         Some(Token::new(token_type, self.token_pos, self.pos))
     }
-}
-
-pub fn tokenize(source: &str) -> Vec<Token> {
-    Lexer::new(source).collect()
 }
 
 fn identifier_worthy(c: char) -> bool {

@@ -55,7 +55,7 @@ fn run_repl() {
 
                 println!("=> ");
 
-                for t in lexer::tokenize(&input_line) {
+                for t in lexer::Lexer::tokenize(&input_line) {
                     println!("{:?}", t.token_type)
                 }
 
@@ -78,7 +78,7 @@ fn run_file(path: &str) {
 
     println!("=> ");
 
-    for t in lexer::tokenize(&source_buffer) {
+    for t in lexer::Lexer::tokenize(&source_buffer) {
         println!("{:?}", t.token_type)
     }
 }
@@ -97,7 +97,9 @@ fn run_block_tree(path: &str) {
 
     let mut tree = BlockTree::new(&source_buffer, 0);
     let mut collection = tree.collect_indents();
-    let mut root_chunk = tree.make_tree(&collection);
+    let mut root_chunk = lexer::Lexer::tokenize_branch(
+        &tree.make_tree(&collection),
+    );
 
     println!("{:?}", root_chunk)
 }

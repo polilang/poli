@@ -9,12 +9,12 @@ pub enum ChunkContent<'a> {
 
 #[derive(Debug, Clone)]
 pub struct Chunk<'a> {
-    content: ChunkContent<'a>,
+    pub content: ChunkContent<'a>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Branch<'a> {
-    content: Vec<Chunk<'a>>,
+    pub content: Vec<Chunk<'a>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
