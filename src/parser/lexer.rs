@@ -164,7 +164,7 @@ impl<'a> Lexer<'a> {
         buffer
     }
 
-    fn lex_string(&mut self) -> String {
+    fn lex_string(&mut self, del: char) -> String {
         let mut buffer = String::new();
 
         loop {
@@ -195,7 +195,7 @@ impl<'a> Lexer<'a> {
                     })
                 },
 
-                '"'  => break,
+                c if c == del  => break,
                 c    => buffer.push(c),
             }
         }
@@ -277,8 +277,8 @@ impl<'a> Iterator for Lexer<'a> {
                     self.move_backward(1);
 
                     match c {
-                        '"' => TokenType::StringLiteral(
-                                    String::from(self.lex_string())
+                        '"' | '\'' => TokenType::StringLiteral(
+                                    String::from(self.lex_string('\''))
                                 ),
                         '['  => TokenType::LBracket,
                         ']'  => TokenType::RBracket,

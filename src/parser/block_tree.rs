@@ -1,20 +1,23 @@
+use parser::lexer::Token;
+
 #[derive(Debug, Clone)]
-enum ChunkContent<'a> {
+pub enum ChunkContent<'a> {
     Text(&'a str),
+    Tokens(Box<Vec<Token>>),
     Block(Box<Branch<'a>>),
 }
 
 #[derive(Debug, Clone)]
-struct Chunk<'a> {
+pub struct Chunk<'a> {
     content: ChunkContent<'a>,
 }
 
 #[derive(Debug, Clone)]
-struct Branch<'a> {
+pub struct Branch<'a> {
     content: Vec<Chunk<'a>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BlockTree<'a> {
     source: &'a str,
     line_number: usize,
