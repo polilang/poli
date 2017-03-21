@@ -1,7 +1,7 @@
 Apple:
 	new =:
-		.size -> string = "v big and juicy" # declared
-		.name = "sabri" 					# inferred
+		string .size = "v big and juicy"
+		.name = "sabri" 
 
 	make_greeting = name :
 		print "yes hello, " + name
