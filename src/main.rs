@@ -10,14 +10,17 @@ use std::env;
 
 mod parser;
 use parser::lexer;
+use parser::block_tree::BlockTree;
+
 
 const USAGE: &'static str = "
 the poli language
 
 usage:
     poli run <source>
+    poli trees
     poli build <source> [--optimize]
-    poli new <project name>
+    poli new <name>
     poli repl
     poli (-h | --help)
     poli --version
@@ -80,6 +83,35 @@ fn run_file(path: &str) {
     }
 }
 
+fn run_block_tree() {
+
+    let source_buffer = "
+range:
+    new = a, b, step :
+        .current = null
+        .end = b or a
+        .start = b and a or 1
+        .step = step or 1
+
+    __next__ =:
+        if not .current
+            .current = .start
+
+        elif (.step > 0 and .current <= .end) or (.step < 0 and .current >= .end)
+            .current += .step
+
+        else
+            return null
+
+        return .current
+    ";
+
+    let mut tree = BlockTree::new(&source_buffer, 0);
+    let mut collection = tree.collect_indents();
+    let mut root_chunk = tree.make_tree(&collection);
+
+    println!("{:?}", root_chunk)
+}
 
 fn main() {
 
@@ -93,5 +125,7 @@ fn main() {
         run_repl()
     } else if args.get_bool("run") {
         run_file(args.get_str("<source>"))
+    } else if args.get_bool("trees") {
+        run_block_tree()
     }
 }
