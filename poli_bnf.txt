@@ -1,0 +1,91 @@
+string  :=  " {<ascii>} "
+        |   ' {<ascii>} '
+
+integer :=  <digit> {<number>}
+
+float   :=  {<integer>}.<integer>
+
+number  :=  <integer | float>
+
+bool    :=  true
+        |   false
+        |   null
+
+add     :=  +
+sub     :=  -
+mul     :=  *
+div     :=  /
+mod     :=  %
+pow     :=  ^
+op-math :=  <add | sub | mul | div | mod | pow>
+
+lt      :=  <
+gt      :=  >
+le      :=  <= | =<
+ge      :=  >= | =>
+eq      :=  ==
+ne      :=  !=
+or      :=  or
+and     :=  and
+not     :=  not
+op-bool :=  <lt | gt | le | ge | eq | ne | or | and | not>
+
+op      := <op-math | op-bool>
+
+bar     :=  |
+lparen  :=  (
+rparen  :=  )
+assign  :=  =
+colon   :=  :
+newline :=  \n {\r}
+arrow   :=  ->
+uscore  :=  _
+dot     :=  .
+
+
+
+word    := <alpha | digit | uscore | dot> {<word>}
+
+param   := <word> {, <param>}
+args    := <expr> {, <expr>}
+
+atom    := <string | number | bool | word | fn-call>
+
+expr    := <atom> {<op> <expr>}
+exp-bool:= <atom> {<op-bool> <exp-bool>}
+
+if      :=  if <exp-bool> -> <statement>
+        |   if <exp-bool>
+                <block>
+            {elif <exp-bool>
+                <block>}
+            {else
+                <block>}
+
+for     :=  for {<param> in} <iterable> <arrow> <statement>
+        |   for {<param> in} <iterable>
+                <block>
+
+while   :=  while <exp-bool> <arrow> <statement>
+        |   while <exp-bool>
+                <block>
+
+lambda  :=  <bar | lparen> {<param>} <colon> {return} <expr> <bar | rparen>
+
+fn-def  :=  <lambda>
+        |   <word> <assign> {<param>} <colon> {return} <expr>
+        |   <word> <assign> {<param>} <colon>
+                <block>
+                {return <expr>}
+
+
+fn-call :=  <lambda | word> {lparen} <args> {rparen}
+
+assignmt:=  <param> <assign> <args>
+
+class   :=  <word> <colon>
+                <block>
+
+cls-word:=  <dot> <word>
+
+
