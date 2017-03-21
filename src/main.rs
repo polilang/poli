@@ -18,7 +18,7 @@ the poli language
 
 usage:
     poli run <source>
-    poli trees
+    poli trees <source>
     poli build <source> [--optimize]
     poli new <name>
     poli repl
@@ -83,28 +83,17 @@ fn run_file(path: &str) {
     }
 }
 
-fn run_block_tree() {
+fn run_block_tree(path: &str) {
 
-    let source_buffer = "
-range:
-    new = a, b, step :
-        .current = null
-        .end = b or a
-        .start = b and a or 1
-        .step = step or 1
+    let mut source_file = match File::open(path) {
+        Ok(f)  => f,
+        Err(_) => panic!("failed to open path: {}", path),
+    };
 
-    __next__ =:
-        if not .current
-            .current = .start
+    let mut source_buffer = String::new();
+    source_file.read_to_string(&mut source_buffer).unwrap();
 
-        elif (.step > 0 and .current <= .end) or (.step < 0 and .current >= .end)
-            .current += .step
-
-        else
-            return null
-
-        return .current
-    ";
+    println!("=> ");
 
     let mut tree = BlockTree::new(&source_buffer, 0);
     let mut collection = tree.collect_indents();
@@ -126,6 +115,6 @@ fn main() {
     } else if args.get_bool("run") {
         run_file(args.get_str("<source>"))
     } else if args.get_bool("trees") {
-        run_block_tree()
+        run_block_tree(args.get_str("<source>"))
     }
 }
