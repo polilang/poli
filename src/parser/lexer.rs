@@ -199,7 +199,9 @@ impl<'a> Lexer<'a> {
                     self.move_forward(2 - accum);
                     break
                 },
-                None    => (),
+                None    => {
+                    ()
+                },
             }
 
             self.move_forward(1);
@@ -318,7 +320,7 @@ impl<'a> Iterator for Lexer<'a> {
             match bin_op(&self.lex_bin_op()) {
                 Some(o) => TokenType::BinaryOp(o),
                 None    => {
-
+                    self.move_backward(1);
                     match c {
                         '"' | '\'' =>  {
                             self.move_backward(1);
