@@ -323,8 +323,6 @@ impl<'a> Iterator for Lexer<'a> {
                     self.move_backward(1);
                     match c {
                         '"' | '\'' =>  {
-                            self.move_backward(1);
-
                             TokenType::StringLiteral(
                                 String::from(self.lex_string(c))
                             )
