@@ -6,7 +6,7 @@ use lexer::{
 
 #[derive(Debug, Clone)]
 pub enum Expression {
-    Double(f64),
+    DoubleLiteral(f64),
     StringLiteral(String),
     Bool(bool),
     Call(Box<Expression>, Box<Vec<Expression>>),
@@ -54,16 +54,46 @@ impl Parser {
         self.pos < self.source.len() - 1
     }
 
+    fn match_current_token(&self, t: TokenType) -> Result<Token, String> {
+        let a = Self::guard_look(self.source.clone(), self.pos.clone());
+
+        match a.token_type == t {
+            true  => Ok(a.clone()),
+            false => Err(format!(
+                "expected {:?} but found {:?}", t, a,
+            )),
+        }
+    }
+
     fn parse_word(&mut self) -> Result<Expression, String> {
-        match &self.look(0).token_type {
-            &TokenType::NumberLiteral(ref n) => {
+        match Self::guard_look(self.source.clone(), self.pos.clone()).token_type {
+            TokenType::NumberLiteral(n) => {
                 match n.parse::<f64>() {
-                    Ok(i)  => Ok(Expression::Double(i)),
+                    Ok(i)  => Ok(Expression::DoubleLiteral(i)),
                     Err(_) => Err(String::from("failed to parse number literal")),
                 }
             },
 
-            &TokenType::Bool(b) => Ok(Expression::Bool(b)),
+            TokenType::Bool(b) => Ok(Expression::Bool(b)),
+            TokenType::StringLiteral(s) => Ok(Expression::StringLiteral(s)),
+
+            TokenType::LParen => {
+                self.pos += 1;
+
+                let expr = try!(self.parse_expression());
+                
+                try!(self.match_current_token(TokenType::RParen));
+
+                self.pos += 1;
+
+                if Self::guard_look(self.source.clone(), self.pos.clone()).token_type == TokenType::LParen {
+                    return self.parse_call(expr)
+                }
+
+                self.pos -= 1;
+
+                Ok(expr)
+            },
 
             _ => {
                 Err(String::from("v bad expression, didn't parse correctly"))
@@ -137,5 +167,45 @@ impl Parser {
         }
 
         Ok(expr_list.pop().unwrap())
+    }
+
+    fn parse_expression(&mut self) -> Result<Expression, String> {
+        let expr = try!(self.parse_word());
+
+        self.pos += 1;
+
+        if self.source[self.pos..].len() > 0 {
+
+            let is_bin_op = match Self::guard_look(self.source.clone(), self.pos.clone()).token_type {
+                TokenType::BinaryOp((_, _)) => true,
+                _                => false,
+            };
+
+            if is_bin_op {
+                return self.parse_bin_op(expr)
+            }
+
+            self.pos -= 1;
+        }
+
+        Ok(expr)
+    }
+
+    fn parse_call(&mut self, callee: Expression) -> Result<Expression, String> {
+        let mut stack = Vec::new();
+
+        self.pos += 1;
+
+        while Self::guard_look(self.source.clone(), self.pos.clone()).token_type != TokenType::RParen {
+            stack.push(try!(self.parse_expression()));
+
+            self.pos += 1;
+
+            if Self::guard_look(self.source.clone(), self.pos.clone()).token_type == TokenType::Comma {
+                self.pos += 1;
+            }
+        }
+
+        Ok(Expression::Call(Box::new(callee), Box::new(stack)))
     }
 }
