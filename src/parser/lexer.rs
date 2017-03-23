@@ -1,6 +1,5 @@
 use std::ops::Range;
 use parser::block_tree::{
-    BlockTree,
     Branch,
     ChunkContent,
     Chunk,

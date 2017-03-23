@@ -1,7 +1,4 @@
-use parser::lexer;
-
 use lexer::{
-    Lexer,
     TokenType,
     Token,
     BinaryOp,
@@ -13,21 +10,12 @@ pub enum Expression {
     StringLiteral(String),
     Bool(bool),
     Call(Box<Expression>, Box<Vec<Expression>>),
+    Operation(Box<Expression>, BinaryOp, Box<Expression>),
 }
 
 #[derive(Debug, Clone)]
 pub enum Statement {
 
-}
-
-#[derive(Debug, Clone)]
-pub enum Type {
-    Str,
-    Int,
-    Float,
-    Double,
-    Bool,
-    Dynamic,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -46,12 +34,12 @@ impl Parser {
         parser
     }
 
-    fn guard_look(source: &Vec<Token>, pos: usize) -> &Token {
+    fn guard_look(source: Vec<Token>, pos: usize) -> Token {
         if pos > source.len() - 1 {
-            return &source[source.len() - 1]
+            return source[source.len() - 1].clone()
         }
 
-        &source[pos]
+        source[pos].clone()
     }
 
     fn look(&self, offset: usize) -> &Token {
@@ -104,7 +92,7 @@ impl Parser {
         let mut done = false;
 
         while expr_list.len() > 1 {
-            let a = Self::guard_look(&self.source, self.pos.clone());
+            let a = Self::guard_look(self.source.clone(), self.pos.clone());
 
             if !done && self.has_next() {
                 let (op, prec) = match &a.token_type {
@@ -120,13 +108,34 @@ impl Parser {
                     },
                 };
 
-                if prec > oper_list.last().unwrap().1 {
-                    let left  = oper_list.pop().unwrap();
-                    let right = oper_list.pop().unwrap()
+                if prec > &oper_list.last().unwrap().1 {
+
+                    let left = expr_list.pop().unwrap();
+                    let right = expr_list.pop().unwrap();
+
+                    expr_list.push(Expression::Operation(
+                        Box::new(left),
+                        oper_list.pop().unwrap().0,
+                        Box::new(right),
+                    ));
+
+                    self.pos += 1;
+
+                    expr_list.push(try!(self.parse_word()));
+                    oper_list.push((op.clone(), prec.clone()));
+
+                    continue
                 }
+
+                let left  = expr_list.pop().unwrap();
+                let right = expr_list.pop().unwrap();
+
+                expr_list.push(Expression::Operation(
+                    Box::new(left), oper_list.pop().unwrap().0, Box::new(right),
+                ));
             }
         }
 
-        Err(String::from("heyo")).unwrap()
+        Ok(expr_list.pop().unwrap())
     }
 }
