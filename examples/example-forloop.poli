@@ -1,0 +1,36 @@
+with range from stdlib-range
+
+
+~ for loop without using elements
+
+sum = 0
+for range 10 -> sum += 1
+
+print sum
+
+
+~ for loop using elements
+
+sum = 0
+for i in range 10
+    sum += i
+
+
+~ iterating a list
+
+mylist = [1, 2, 3, 4, 5]
+for item in mylist
+    print item
+
+
+~ iterating a list directly
+
+for item in [1, 2, 3, 4] -> print item
+
+
+~ populating a list using range
+
+mylist = []
+for item in range 10 -> mylist.append item
+
+
