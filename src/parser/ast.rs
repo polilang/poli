@@ -5,7 +5,12 @@ use lexer::{
     TokenType,
 };
 
-trait Node: Sized {
+#[derive(Debug, Clone)]
+struct Node {
+
+}
+
+trait ParserNode: Sized {
     fn parse(&mut self, parser: Parser);
 }
 
@@ -19,6 +24,7 @@ impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
             tokens: tokens,
+            signatures: HashMap::new(),
         }
     }
 
@@ -26,9 +32,8 @@ impl Parser {
         loop {
             match self.tokens.pop() {
                 Some(t) => {
-                    match self.signatures[&t] {
-                        Some(&n) => n.parse(), 
-                        None     => continue
+                    match self.signatures[&t.token_type] {
+                        ref n => println!("found signature: {:#?}", n), 
                     }
                 },
 

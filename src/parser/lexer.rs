@@ -5,7 +5,7 @@ use parser::block_tree::{
     Chunk,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum TokenType {
     Identifier(String),
     StringLiteral(String),
@@ -21,11 +21,7 @@ pub enum TokenType {
     LBracket,
     RBracket,
     Assign,
-    If,
-    Else,
-    For,
-    This,
-    Return,
+    Keyword(String),
     Bool(bool),
     BinaryOp(String),
     Invalid,
@@ -299,17 +295,9 @@ impl<'a> Iterator for Lexer<'a> {
         };
 
         let token_type = if c.is_alphabetic() {
-            match self.lex_term() {
-                "if"     => TokenType::If,
-                "else"   => TokenType::Else,
-                "for"    => TokenType::For,
-                "true"   => TokenType::Bool(true),
-                "false"  => TokenType::Bool(false),
-                "return" => TokenType::Return,
-                "this"   => TokenType::This,
-                _        => TokenType::Identifier(
-                                String::from(self.lex_term())
-                            ),
+            match keyword(self.lex_term()) {
+                Some(t) => t,
+                None    => TokenType::Identifier(String::from(self.lex_term())),
             }
         } else if c.is_digit(10) {
             TokenType::NumberLiteral(
@@ -348,6 +336,19 @@ impl<'a> Iterator for Lexer<'a> {
 fn identifier_worthy(c: char) -> bool {
     c.is_alphabetic() || c == '_'
                       || c == '?'
+}
+
+fn keyword(k: &str) -> Option<TokenType> {
+    match k {
+          "if"
+        | "for"
+        | "else"
+        | "return"
+        | "true"
+        | "false"
+        | "this" => Some(TokenType::Keyword(String::from(k))),
+        _        => None,
+    }
 }
 
 fn bin_op(v: &str) -> Option<(BinaryOp, u8)> {

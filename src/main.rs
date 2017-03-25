@@ -19,14 +19,9 @@ the poli language
 usage:
     poli run <source>
     poli trees <source>
-    poli build <source> [--optimize]
-    poli new <name>
     poli repl
     poli (-h | --help)
     poli --version
-
-    poli lexer <source>
-    poli ast <source>
 
 options:
     -h --help   show this message
