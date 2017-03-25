@@ -37,9 +37,10 @@ impl<'a> BlockTree<'a> {
         let mut lines = self.source.lines();
 
         while let Some(l) = lines.next() {
-            if l.trim().len() > 0 {
+            let ln = l.trim();
+            if ln.len() > 0 {
                 let indent = get_indent(&l);
-                indent_list.push((indent, &l[indent..]));
+                indent_list.push((indent, ln));
             }
         }
         

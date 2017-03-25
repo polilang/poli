@@ -273,10 +273,8 @@ impl<'a> Lexer<'a> {
     fn move_backward(&mut self, delta: usize) {
         for _ in 0 .. delta {
             if let Some(c) = self.current {
-                self.pos -= c.len_utf8();
+                self.pos     -= c.len_utf8();
                 self.current = self.char_at(self.pos);
-            } else {
-                panic!("lexer lexing too far backward")
             }
         }
     }
@@ -329,18 +327,15 @@ impl<'a> Iterator for Lexer<'a> {
                                 String::from(self.lex_string(c))
                             )
                         },
-                        '['  => TokenType::LBracket,
-                        ']'  => TokenType::RBracket,
-                        '('  => TokenType::LParen,
-                        ')'  => TokenType::RParen,
-                        '{'  => TokenType::LBrace,
-                        '}'  => TokenType::RBrace,
-                        ','  => TokenType::Comma,
-                        ':'  => TokenType::Colon,
-                        ';'  => TokenType::Semicolon,
-                        '.'  => TokenType::Period,
-                        '='  => TokenType::Assign,
-                        _    => TokenType::Invalid
+                        _    => {
+                            match symbol(&c) {
+                                Some(s) => {
+                                    self.move_backward(1);
+                                    s
+                                },
+                                None    => TokenType::Invalid,
+                            }
+                        }
                     }
                 },
             }
@@ -367,6 +362,23 @@ fn bin_op(v: &str) -> Option<(BinaryOp, u8)> {
         ">"  => Some((BinaryOp::Gt, 4)),
         "<=" => Some((BinaryOp::GtEquals, 4)),
         ">=" => Some((BinaryOp::LtEquals, 4)),
+        _    => None,
+    }
+}
+
+fn symbol(v: &char) -> Option<TokenType> {
+    match *v {
+        '['  => Some(TokenType::LBracket),
+        ']'  => Some(TokenType::RBracket),
+        '('  => Some(TokenType::LParen),
+        ')'  => Some(TokenType::RParen),
+        '{'  => Some(TokenType::LBrace),
+        '}'  => Some(TokenType::RBrace),
+        ','  => Some(TokenType::Comma),
+        ':'  => Some(TokenType::Colon),
+        ';'  => Some(TokenType::Semicolon),
+        '.'  => Some(TokenType::Period),
+        '='  => Some(TokenType::Assign),
         _    => None,
     }
 }
