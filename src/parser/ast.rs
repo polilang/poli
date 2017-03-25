@@ -1,8 +1,39 @@
+use std::collections::HashMap;
+
+use lexer::{
+    Token,
+    TokenType,
+};
+
+trait Node: Sized {
+    fn parse(&mut self, parser: Parser) -> Node;
+}
+
 #[derive(Debug, Clone)]
-pub enum Expression {
-    Integer(i64),
-    Float(f64),
-    Text(String),
-    Bool(bool),
-    Call(Box<Expression>, Box<Vec<Expression>>),
+pub struct Parser {
+    signatures: HashMap<TokenType, Node>,
+    tokens:     Vec<Token>,
+}
+
+impl Parser {
+    pub fn new(tokens: Vec<Token>) -> Parser {
+        Parser {
+            tokens: tokens,
+        }
+    }
+
+    fn parse(&mut self) {
+        loop {
+            match self.tokens.pop() {
+                Some(t) => {
+                    match self.signatures[&t] {
+                        Some(&n) => n.parse(), 
+                        None     => continue
+                    }
+                },
+
+                None    => break
+            }
+        }
+    }
 }

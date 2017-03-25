@@ -1,6 +1,5 @@
 use std::ops::Range;
 use parser::block_tree::{
-    BlockTree,
     Branch,
     ChunkContent,
     Chunk,
@@ -9,33 +8,26 @@ use parser::block_tree::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TokenType {
     Identifier(String),
-    
     StringLiteral(String),
     NumberLiteral(String),
-    
     Colon,
     Semicolon,
     Comma,
     Period,
-
     LParen,
     RParen,
     LBrace,
     RBrace,
     LBracket,
     RBracket,
-
     Assign,
-
     If,
     Else,
     For,
     This,
     Return,
     Bool(bool),
-
-    BinaryOp((BinaryOp, u8)),
-
+    BinaryOp(String),
     Invalid,
 }
 
@@ -124,6 +116,7 @@ impl<'a> Lexer<'a> {
         Self::new(source).collect()
     }
 
+    /// Tokenize block tree
     pub fn tokenize_branch(branch: &Branch<'a>) -> Branch<'a> {
         let mut branch_ret = Branch {
             content: Vec::new(),
@@ -158,6 +151,7 @@ impl<'a> Lexer<'a> {
         branch_ret
     }
 
+    /// Lex identifier term at current position `self.pos`
     fn lex_term(&mut self) -> &str {
         while let Some(c) = self.current {
             if !(identifier_worthy(c) || c.is_digit(10)) {
@@ -170,6 +164,7 @@ impl<'a> Lexer<'a> {
         &self.source[self.token_pos .. self.pos]
     }
 
+    /// Lex number literal at current position `self.pos`
     fn lex_number(&mut self) -> &str {
         while let Some(c) = self.current {
             if !c.is_digit(10) && c != '.' {
@@ -182,8 +177,9 @@ impl<'a> Lexer<'a> {
         &self.source[self.token_pos .. self.pos]
     }
 
+    /// Lex binary operand at current position `self.pos`
     fn lex_bin_op(&mut self) -> String {
-        let mut accum  = 2; // max operand length
+        let mut accum  = 2;
         let mut buffer = String::new();
 
         while let Some(c) = self.current {
@@ -210,6 +206,7 @@ impl<'a> Lexer<'a> {
         buffer
     }
 
+    /// Lex string literal by given delimeter `del`
     fn lex_string(&mut self, del: char) -> String {
         let mut buffer = String::new();
 
@@ -249,6 +246,7 @@ impl<'a> Lexer<'a> {
         buffer
     }
 
+    /// Moves past whitespace in `self.source` string
     fn move_whitespace(&mut self) {
         while let Some(c) = self.current {
             if !c.is_whitespace() {
@@ -259,6 +257,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Moves position pointer `delta` steps forward
     fn move_forward(&mut self, delta: usize) {
         for _ in 0 .. delta {
             if let Some(c) = self.current {
@@ -270,6 +269,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Moves position pointer `delta` steps backward
     fn move_backward(&mut self, delta: usize) {
         for _ in 0 .. delta {
             if let Some(c) = self.current {
@@ -281,6 +281,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    /// Returns char at position `pos`
     fn char_at(&self, pos: usize) -> Option<char> {
         self.source[pos ..].chars().next()
     }
@@ -317,12 +318,13 @@ impl<'a> Iterator for Lexer<'a> {
                 String::from(self.lex_number())
             )
         } else {
-            match bin_op(&self.lex_bin_op()) {
-                Some(o) => TokenType::BinaryOp(o),
+            let a = self.lex_bin_op();
+            match bin_op(&a) {
+                Some(_) => TokenType::BinaryOp(a),
                 None    => {
-                    self.move_backward(1);
                     match c {
                         '"' | '\'' =>  {
+                            self.move_backward(1);
                             TokenType::StringLiteral(
                                 String::from(self.lex_string(c))
                             )
