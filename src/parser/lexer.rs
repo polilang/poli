@@ -22,7 +22,6 @@ pub enum TokenType {
     RBracket,
     Assign,
     Keyword(String),
-    Bool(bool),
     BinaryOp(String),
     Invalid,
 }
@@ -41,7 +40,7 @@ pub enum BinaryOp {
     GtEquals,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub token_type: TokenType,
     pub span:       Span,

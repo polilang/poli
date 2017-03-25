@@ -10,6 +10,7 @@ use std::env;
 
 mod parser;
 use parser::lexer;
+use parser::ast;
 use parser::block_tree::BlockTree;
 
 
@@ -28,6 +29,27 @@ options:
     --version   show compiler version
     --optimize  optimize compiled LLVM IR
 ";
+
+fn test_parser(token_stack: &Vec<lexer::Token>) {
+    let mut parser = ast::Parser::new(token_stack.clone());
+
+    #[derive(Debug)]
+    struct Test {};
+
+    impl ast::ParserNode for Test {
+        fn parse(&self, t: &mut Vec<lexer::Token>) {
+            println!("{:#?}", t)
+        }
+    }
+
+    let a = Test {};
+    {
+        parser.introduce_node(lexer::TokenType::Semicolon, Box::new(a));
+    }
+
+    parser.parse();
+
+}
 
 fn run_repl() {
     println!("the poli language\n");
@@ -50,9 +72,13 @@ fn run_repl() {
 
                 println!("=> ");
 
-                for t in lexer::Lexer::tokenize(&input_line) {
+                let token_stack = lexer::Lexer::tokenize(&input_line);
+
+                for t in &token_stack {
                     println!("{:?}", t.token_type)
                 }
+
+                test_parser(&token_stack);
 
                 println!()
             },
