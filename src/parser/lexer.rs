@@ -345,6 +345,11 @@ fn keyword(k: &str) -> Option<TokenType> {
         | "return"
         | "true"
         | "false"
+        | "elif"
+        | "not"
+        | "or"
+        | "with"
+        | "from"
         | "this" => Some(TokenType::Keyword(String::from(k))),
         _        => None,
     }

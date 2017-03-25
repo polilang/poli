@@ -1,5 +1,5 @@
 range:
-    new = a, b, step :
+    !!new = a, b, step :
         .current = null
         .end = b or a
         .start = b and (a or 0)
