@@ -1,5 +1,8 @@
+~ i am a comment, yes hello
+~ another comment
 Apple:
   new =:
+    ~ this is a comment
     string .size = "v big and juicy"
     .name = "sabri" 
 

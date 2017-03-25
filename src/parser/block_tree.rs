@@ -38,7 +38,8 @@ impl<'a> BlockTree<'a> {
 
         while let Some(l) = lines.next() {
             let ln = l.trim();
-            if ln.len() > 0 {
+
+            if ln.len() > 0 && ln.chars().nth(0).unwrap() != '~' {
                 let indent = get_indent(&l);
                 indent_list.push((indent, ln));
             }
