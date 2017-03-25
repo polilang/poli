@@ -1,0 +1,48 @@
+# Poli syntax highlighting for Micro.
+# ~/.config/micro/syntax/poli.micro
+# Date: 17-03-24
+
+
+syntax "poli" ".*\.poli"
+
+
+# Statements
+
+# External files
+color preproc "(\b(with|from)|%q|%!|%Q|%r|%x)\b"
+
+# Keywords
+color statement "\b(print|input)\b"
+
+# Flow control
+color statement "\b(do|while|if|elif|else|for|in|return|continue|break)\b"
+
+# Standard library
+color special "\b(std|list|range)\b"
+
+# Methods
+color statement "\.\b(.+?)\b"
+
+# Logic
+color special "\b(not|and|or)\b"
+
+# false, nil, true
+color constant.bool "\b(false|null|true)\b"
+
+# Numbers
+color constant.number "\b([0-9]+)\b"
+
+# Symbols
+color symbol "(\(|\)|\[|\]|\{|\}|\*|/|%|\+|-|\^|>|<|=|!|,)"
+
+# Strings
+color constant.string "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
+
+# Multiline strings
+color constant.string start="\s*(\"\"\")" end="(\"\"\")"
+
+# Escapes
+color special "\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]|\\[abefnrs]|(\\c|\\C-|\\M-|\\M-\\C-)."
+
+# Comment
+color comment "\~.*$"

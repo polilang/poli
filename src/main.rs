@@ -96,8 +96,8 @@ fn run_block_tree(path: &str) {
     println!("=> ");
 
     let mut tree = BlockTree::new(&source_buffer, 0);
-    let mut collection = tree.collect_indents();
-    let mut root_chunk = lexer::Lexer::tokenize_branch(
+    let collection = tree.collect_indents();
+    let root_chunk = lexer::Lexer::tokenize_branch(
         &tree.make_tree(&collection),
     );
 
