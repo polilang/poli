@@ -74,17 +74,15 @@ fn run_repl() {
                     std::process::exit(0)
                 }
 
-                println!("=> ");
+                let mut tree   = BlockTree::new(&input_line, 0);
+                let collection = tree.collect_indents();
+                let root_chunk = lexer::Lexer::tokenize_branch(
+                    &tree.make_tree(&collection),
+                );
 
-                let token_stack = lexer::Lexer::tokenize(&input_line);
+                println!("=> {:#?}", root_chunk)
 
-                for t in &token_stack {
-                    println!("{:?}", t.token_type)
-                }
-
-                test_parser(&token_stack);
-
-                println!()
+                //test_parser(&token_stack);
             },
 
             Err(e) => panic!(e),

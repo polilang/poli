@@ -49,14 +49,14 @@ impl<'a> BlockTree<'a> {
     }
 
     pub fn make_tree(&mut self, indent_list: &Vec<(usize, &'a str)>) -> Branch<'a> {
+        let mut branch: Branch = Branch {
+            content: Vec::new(),
+        };
 
         let base_line               = indent_list.get(self.line_number);
         let &(base_indent, _) = match base_line {
             Some(l) => l,
-            None    => panic!("parsing non-existing branch"),
-        };
-        let mut branch: Branch = Branch {
-            content: Vec::new(),
+            None    => return branch,
         };
         
         while self.line_number < indent_list.len() {
