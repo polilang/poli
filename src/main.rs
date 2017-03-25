@@ -101,7 +101,7 @@ fn run_block_tree(path: &str) {
         &tree.make_tree(&collection),
     );
 
-    println!("{:?}", root_chunk)
+    println!("{:#?}", root_chunk)
 }
 
 fn main() {

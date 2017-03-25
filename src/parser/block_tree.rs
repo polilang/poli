@@ -53,7 +53,6 @@ impl<'a> BlockTree<'a> {
             Some(l) => l,
             None    => panic!("parsing non-existing branch"),
         };
-
         let mut branch: Branch = Branch {
             content: Vec::new(),
         };
@@ -94,8 +93,10 @@ impl<'a> BlockTree<'a> {
 fn get_indent(line: &str) -> usize {
     let mut pos: usize = 0;
 
-    while line[pos..].chars().next() == Some(' ') {
-        pos += 1
+    for c in line.chars() {
+        if c == ' ' {
+            pos += 1
+        }
     }
 
     pos

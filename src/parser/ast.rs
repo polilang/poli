@@ -6,7 +6,7 @@ use lexer::{
 };
 
 trait Node: Sized {
-    fn parse(&mut self, parser: Parser) -> Node;
+    fn parse(&mut self, parser: Parser);
 }
 
 #[derive(Debug, Clone)]
@@ -36,3 +36,4 @@ impl Parser {
             }
         }
     }
+}
