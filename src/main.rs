@@ -14,10 +14,14 @@ use parser::ast;
 use parser::block_tree::BlockTree;
 
 
+mod compiler;
+use compiler::Module;
+
 const USAGE: &'static str = "
 the poli language
 
 usage:
+    poli build <source> <destination>
     poli run <source>
     poli trees <source>
     poli repl
@@ -104,6 +108,19 @@ fn run_file(path: &str) {
     }
 }
 
+fn build_file(_: &str, destination: &str) {
+
+    let module = Module::new("poli");
+
+    module.write_object(destination);
+
+    println!("=> writing to: {}\n", destination);
+    
+    module.dump();
+
+    println!("")
+}
+
 fn run_block_tree(path: &str) {
 
     let mut source_file = match File::open(path) {
@@ -137,6 +154,8 @@ fn main() {
         run_repl()
     } else if args.get_bool("run") {
         run_file(args.get_str("<source>"))
+    } else if args.get_bool("build") {
+        build_file(args.get_str("<source>"), args.get_str("<destination>"))
     } else if args.get_bool("trees") {
         run_block_tree(args.get_str("<source>"))
     }
