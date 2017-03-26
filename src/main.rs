@@ -36,8 +36,26 @@ options:
     --optimize  optimize compiled LLVM IR
 ";
 
-fn test_parser(token_tree: &Branch) {
-    ast::Parser::parse_branch(&token_tree);
+fn test_parser(token_stack: Vec<lexer::Token>) {
+    let mut parser = ast::Parser::new(token_stack);
+
+    #[derive(Debug)]
+    struct Test {}
+
+    impl ast::ParserNode for Test {
+        fn parse(&self, p: &ast::Parser) -> Box<ast::ParserNode> {
+            println!("ye, test bb <4");
+
+            Box::new(Test {})
+        }
+    }
+
+    parser.introduce_node(
+        vec![lexer::TokenType::Colon, lexer::TokenType::Keyword(String::from("with"))],
+        Box::new(Test {}),
+    );
+
+    parser.parse();
 }
 
 fn run_repl() {
@@ -67,7 +85,7 @@ fn run_repl() {
 
                 println!("=> {:#?}", root_chunk);
 
-                test_parser(&root_chunk)
+                test_parser(lexer::Lexer::tokenize(&input_line))
             },
 
             Err(e) => panic!(e),

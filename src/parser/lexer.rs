@@ -24,6 +24,8 @@ pub enum TokenType {
     RBracket,
     Assign,
     Invalid,
+
+    EOF,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
