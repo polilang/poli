@@ -1,36 +1,41 @@
-with range from stdlib-range
+with range, list from std
 
 
 ~ for loop without using elements
-
 sum = 0
 for range 10 -> sum += 1
 
 print sum
 
 
-~ for loop using elements
 
+~ for loop using elements
 sum = 0
 for i in range 10
     sum += i
 
 
-~ iterating a list
 
-mylist = [1, 2, 3, 4, 5]
+~ iterating a list
+mylist = list 1, 2, 3, 4, 5
 for item in mylist
     print item
 
 
-~ iterating a list directly
 
-for item in [1, 2, 3, 4] -> print item
+~ iterating a list directly
+for item in list 1, 2, 3, 4 -> print item
+
 
 
 ~ populating a list using range
-
-mylist = []
+mylist = list!
 for item in range 10 -> mylist.append item
 
 
+
+~ populating a list using range, skipping odd numbers
+mylist = list!
+for item in range 10
+    if not item % 2
+        mylist.append item
