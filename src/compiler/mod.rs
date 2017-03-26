@@ -31,23 +31,10 @@ impl Module {
             let name    = CString::new(name).unwrap();
             let module  = LLVMModuleCreateWithNameInContext(name.as_ptr(), context);
 
-            let m = Module {
+            Module {
                 context: context,
                 module:  module,
-            };
-
-            let i32_type = LLVMInt32TypeInContext(m.context);
-            let string_type = LLVMPointerType(LLVMInt8TypeInContext(m.context), 0);
-            let mut arg_types = [string_type];
-
-            let puts_type = LLVMFunctionType(
-                i32_type, arg_types.as_mut_ptr(),
-                arg_types.len() as libc::c_uint, 0
-            );
-
-            LLVMAddFunction(m.module, c_str!("print"), puts_type);
-
-            m
+            }
         }
     }
 

@@ -1,6 +1,12 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 
+use parser::block_tree::{
+    Branch,
+    ChunkContent,
+};
+
+
 use lexer::{Token, TokenType};
 
 pub trait ParserNode: Debug {
@@ -23,6 +29,20 @@ impl Parser {
 
     pub fn introduce_node(&mut self, signature: TokenType, node: Box<ParserNode>) {
         self.signatures.insert(signature, node);
+    }
+
+    pub fn parse_branch<'a>(branch: &Branch<'a>) {
+        for chunk in branch.content.iter() {
+            match chunk.content {
+                ChunkContent::Tokens(ref t) => {
+                    Parser::new(t.clone()).parse()
+                },
+
+                ChunkContent::Block(ref b) => Self::parse_branch(b),
+
+                _ => continue
+            }
+        }
     }
 
     pub fn parse(&mut self) {

@@ -3,8 +3,8 @@ use parser::lexer::Token;
 #[derive(Debug, Clone)]
 pub enum ChunkContent<'a> {
     Text(&'a str),
-    Tokens(Box<Vec<Token>>),
-    Block(Box<Branch<'a>>),
+    Tokens(Vec<Token>),
+    Block(Branch<'a>),
 }
 
 #[derive(Debug, Clone)]
@@ -79,7 +79,7 @@ impl<'a> BlockTree<'a> {
                 branch.content.push(
                     Chunk {
                         content: ChunkContent::Block(
-                            Box::new(self.make_tree(&indent_list))
+                            self.make_tree(&indent_list)
                         ),
                     },
                 );

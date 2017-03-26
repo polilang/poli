@@ -10,6 +10,8 @@ pub enum TokenType {
     Identifier(String),
     StringLiteral(String),
     NumberLiteral(String),
+    Keyword(String),
+    BinaryOp(String),
     Colon,
     Semicolon,
     Comma,
@@ -21,8 +23,6 @@ pub enum TokenType {
     LBracket,
     RBracket,
     Assign,
-    Keyword(String),
-    BinaryOp(String),
     Invalid,
 }
 
@@ -123,7 +123,7 @@ impl<'a> Lexer<'a> {
                     branch_ret.content.push(
                         Chunk {
                             content: ChunkContent::Tokens(
-                                Box::new(Self::tokenize(t)),
+                                Self::tokenize(t),
                             ),
                         },
                     );
@@ -133,7 +133,7 @@ impl<'a> Lexer<'a> {
                     branch_ret.content.push(
                         Chunk {
                             content: ChunkContent::Block(
-                                Box::new(Self::tokenize_branch(b)),
+                                Self::tokenize_branch(b),
                             ),
                         },
                     );

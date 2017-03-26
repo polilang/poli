@@ -11,7 +11,9 @@ use std::env;
 mod parser;
 use parser::lexer;
 use parser::ast;
-use parser::block_tree::BlockTree;
+use parser::block_tree::{
+    BlockTree, Branch
+};
 
 
 mod compiler;
@@ -34,25 +36,8 @@ options:
     --optimize  optimize compiled LLVM IR
 ";
 
-fn test_parser(token_stack: &Vec<lexer::Token>) {
-    let mut parser = ast::Parser::new(token_stack.clone());
-
-    #[derive(Debug)]
-    struct Test {};
-
-    impl ast::ParserNode for Test {
-        fn parse(&self, t: &mut Vec<lexer::Token>) {
-            println!("{:#?}", t)
-        }
-    }
-
-    let a = Test {};
-    {
-        parser.introduce_node(lexer::TokenType::Semicolon, Box::new(a));
-    }
-
-    parser.parse();
-
+fn test_parser(token_tree: &Branch) {
+    ast::Parser::parse_branch(&token_tree);
 }
 
 fn run_repl() {
@@ -80,9 +65,9 @@ fn run_repl() {
                     &tree.make_tree(&collection),
                 );
 
-                println!("=> {:#?}", root_chunk)
+                println!("=> {:#?}", root_chunk);
 
-                //test_parser(&token_stack);
+                test_parser(&root_chunk)
             },
 
             Err(e) => panic!(e),
