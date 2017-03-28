@@ -1,15 +1,19 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 
-use parser::block_tree::{
-    Branch,
-    ChunkContent,
-};
+pub mod base;
+use self::base::literals;
 
 use lexer::{Token, TokenType};
 
+#[derive(Debug)]
+pub enum ASTNode {
+    NumberLiteral(literals::NumberLiteral),
+    StringLiteral(literals::StringLiteral),
+}
+
 pub trait ParserNode: Debug {
-    fn parse(&self, parser: &Parser) -> Box<ParserNode>;
+    fn parse(&self, parser: &Parser) -> ASTNode;
 }
 
 #[derive(Debug)]
@@ -17,7 +21,7 @@ pub struct Parser {
     signatures: HashMap<Vec<TokenType>, Box<ParserNode>>,
     tokens:     Vec<Token>,
     ast:        Vec<Box<ParserNode>>,
-    pos:        usize,    
+    pos:        usize,
 }
 
 impl Parser {
@@ -34,16 +38,23 @@ impl Parser {
         self.signatures.insert(signature, node);
     }
 
-    pub fn parse(mut self) -> Box<ParserNode> {
-        loop {
-            let b = self.signatures.get(&self.signatures.keys().find(
-                |sig| self.match_sequence(sig, 0)
-            ).unwrap().clone()).unwrap();
+    pub fn parse(&mut self) -> Option<ASTNode> {
+        if self.tokens.len() > 0 {
+            loop {
+                let k = match self.signatures.keys().find(|sig| self.match_sequence(sig, 0)) {
+                    Some(v) => v.clone(),
+                    None    => return None,
+                };
 
-            self.pos += 1;
+                let b = self.signatures.get(&k).unwrap();
 
-            return b.parse(&self)
+                self.pos += 1;
+
+                return Some(b.parse(&self))
+            }
         }
+
+        None
     }
 
     pub fn match_sequence(&self, sequence: &Vec<TokenType>, offset: usize) -> bool {
@@ -65,12 +76,26 @@ impl Parser {
                     }
                 },
 
-                TokenType::Identifier(k) => {
+                TokenType::Identifier(_) => {
                     match t {
-                        TokenType::Identifier(k1) => (),
-                        _                         => return false,
+                        TokenType::Identifier(_) => (),
+                        _                        => return false,
                     }
-                }
+                },
+
+                TokenType::NumberLiteral(_) => {
+                    match t {
+                        TokenType::NumberLiteral(_) => (),
+                        _                           => return false,
+                    }
+                },
+
+                TokenType::StringLiteral(_) => {
+                    match t {
+                        TokenType::StringLiteral(_) => (),
+                        _                           => return false,
+                    }
+                },
 
                 a => {
                     if a != t {
@@ -94,10 +119,6 @@ impl Parser {
     }
 
     pub fn get_backward(&self, offset: usize) -> Token {
-        if self.pos - offset < 0 {
-            return Token::new(TokenType::EOF, 0, 0)
-        }
-
         self.tokens[self.pos - offset].clone()
     }
 }
