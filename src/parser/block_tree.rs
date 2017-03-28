@@ -37,9 +37,12 @@ impl<'a> BlockTree<'a> {
         let mut lines = self.source.lines();
 
         while let Some(l) = lines.next() {
-            let ln = l.trim();
 
-            if ln.len() > 0 && ln.chars().nth(0).unwrap() != '~' {
+            let vec_ln: Vec<&str> = l.split("~").collect();
+
+            let ln = vec_ln.get(0).unwrap().trim();
+
+            if ln.len() > 0 {
                 let indent = get_indent(&l);
                 indent_list.push((indent, ln));
             }

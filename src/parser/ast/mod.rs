@@ -57,6 +57,12 @@ impl Parser {
         None
     }
 
+    pub fn expression(&mut self) -> Vec<ASTNode> {
+        let mut expr_stack = Vec::new();
+
+        expr_stack
+    }
+
     pub fn match_sequence(&self, sequence: &Vec<TokenType>, offset: usize) -> bool {
         let mut off = 0 + offset;
 
