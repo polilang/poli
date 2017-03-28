@@ -39,20 +39,66 @@ options:
 fn test_parser(token_stack: Vec<lexer::Token>) {
     let mut parser = ast::Parser::new(token_stack);
 
+    // simple assignment between identifiers
     #[derive(Debug)]
     struct Test {}
+
+    #[derive(Debug)]
+    struct Something {}
+
+    impl Test {
+        pub fn new(a: lexer::TokenType, b: lexer::TokenType) -> Test {
+            println!("{:#?}, {:#?}", a, b);
+
+            Test {}
+        }
+    }
 
     impl ast::ParserNode for Test {
         fn parse(&self, p: &ast::Parser) -> Box<ast::ParserNode> {
             println!("ye, test bb <4");
 
-            Box::new(Test {})
+            Box::new(Test::new(p.get_backward(1).token_type, p.get(1).token_type))
         }
     }
 
+    impl Something {
+        pub fn new(a: Vec<lexer::TokenType>) -> Something {
+            println!("{:#?}", a);
+
+            Something {}
+        }
+    }
+
+    impl ast::ParserNode for Something {
+        fn parse(&self, p: &ast::Parser) -> Box<ast::ParserNode> {
+            println!("ye, test call <4");
+
+            let mut arg_stack: Vec<lexer::TokenType> = Vec::new();
+            let mut off = 0usize;
+
+            while !p.match_sequence(&vec![lexer::TokenType::RParen], off) {
+                arg_stack.push(p.get(off).token_type);
+                off += 1
+            }
+
+            Box::new(Something::new(arg_stack))
+        }
+    }
+
+
     parser.introduce_node(
-        vec![lexer::TokenType::Colon, lexer::TokenType::Keyword(String::from("with"))],
+        vec![lexer::TokenType::Identifier(String::from("")), 
+            lexer::TokenType::Assign,
+            lexer::TokenType::Identifier(String::from(""))],
+
         Box::new(Test {}),
+    );
+
+    parser.introduce_node(
+        vec![lexer::TokenType::Identifier(String::from("")), lexer::TokenType::LParen],
+
+        Box::new(Something {}),
     );
 
     parser.parse();

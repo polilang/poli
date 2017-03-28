@@ -6,7 +6,6 @@ use parser::block_tree::{
     ChunkContent,
 };
 
-
 use lexer::{Token, TokenType};
 
 pub trait ParserNode: Debug {
@@ -38,7 +37,7 @@ impl Parser {
     pub fn parse(mut self) -> Box<ParserNode> {
         loop {
             let b = self.signatures.get(&self.signatures.keys().find(
-                |sig| self.match_sequence(sig)
+                |sig| self.match_sequence(sig, 0)
             ).unwrap().clone()).unwrap();
 
             self.pos += 1;
@@ -47,8 +46,8 @@ impl Parser {
         }
     }
 
-    fn match_sequence(&self, sequence: &Vec<TokenType>) -> bool {
-        let mut off = 0;
+    pub fn match_sequence(&self, sequence: &Vec<TokenType>, offset: usize) -> bool {
+        let mut off = 0 + offset;
 
         for e in sequence {
             let t = self.get(off).token_type;
@@ -66,6 +65,13 @@ impl Parser {
                     }
                 },
 
+                TokenType::Identifier(k) => {
+                    match t {
+                        TokenType::Identifier(k1) => (),
+                        _                         => return false,
+                    }
+                }
+
                 a => {
                     if a != t {
                         return false
@@ -79,11 +85,19 @@ impl Parser {
         true
     }
 
-    fn get(&self, offset: usize) -> Token {
+    pub fn get(&self, offset: usize) -> Token {
         if self.pos + offset > self.tokens.len() {
             return Token::new(TokenType::EOF, 0, 0)
         }
 
         self.tokens[self.pos + offset].clone()
+    }
+
+    pub fn get_backward(&self, offset: usize) -> Token {
+        if self.pos - offset < 0 {
+            return Token::new(TokenType::EOF, 0, 0)
+        }
+
+        self.tokens[self.pos - offset].clone()
     }
 }
