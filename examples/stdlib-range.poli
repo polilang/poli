@@ -5,7 +5,7 @@ range:
         .start = b and (a or 0)
         .step = step or (.end<0 and (-1 or 1))
 
-    __next__ =:
+    !!next =:
         if not .current
             .current = .start
 
