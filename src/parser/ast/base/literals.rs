@@ -2,7 +2,7 @@ use super::super::{
     Parser, ParserNode, ASTNode, TokenType,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NumberLiteral {
     value: f64,
 }
@@ -24,7 +24,7 @@ impl ParserNode for NumberLiteral {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StringLiteral {
     value: String,
 }

@@ -6,7 +6,7 @@ use self::base::literals;
 
 use lexer::{Token, TokenType};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ASTNode {
     NumberLiteral(literals::NumberLiteral),
     StringLiteral(literals::StringLiteral),
@@ -18,7 +18,6 @@ pub trait ParserNode: Debug {
 
 #[derive(Debug)]
 pub struct Parser {
-    signatures: HashMap<Vec<TokenType>, Box<ParserNode>>,
     tokens:     Vec<Token>,
     ast:        Vec<Box<ParserNode>>,
     pos:        usize,
@@ -27,40 +26,57 @@ pub struct Parser {
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
-            signatures: HashMap::new(),
             tokens:     tokens,
             ast:        Vec::new(),
             pos:        0,
         }
     }
 
-    pub fn introduce_node(&mut self, signature: Vec<TokenType>, node: Box<ParserNode>) {
-        self.signatures.insert(signature, node);
-    }
-
-    pub fn parse(&mut self) -> Option<ASTNode> {
+    pub fn parse(mut self, signatures: HashMap<Vec<TokenType>, Box<ParserNode>>) -> Option<ASTNode> {
         if self.tokens.len() > 0 {
-            loop {
-                let k = match self.signatures.keys().find(|sig| self.match_sequence(sig, 0)) {
-                    Some(v) => v.clone(),
-                    None    => return None,
-                };
+            // Immutable borrow occurs here
+            let b = match signatures.keys().find(|sig| self.match_sequence(sig, 0)) {
+                Some(v) => signatures.get(&v.clone()).unwrap(),
+                None    => return None,
+            };
 
-                let b = self.signatures.get(&k).unwrap();
+            self.pos += 1;
 
-                self.pos += 1;
-
-                return Some(b.parse(&self))
-            }
-        }
+            return Some(b.parse(&mut self)) // Conflicts immutable borrow that ends ...
+        } // ... here
 
         None
     }
 
-    pub fn expression(&mut self) -> Vec<ASTNode> {
-        let mut expr_stack = Vec::new();
+    // TODO: work in progress
+    pub fn expression(&self) -> ASTNode {
+        let mut expr_stack: Vec<ASTNode> = Vec::new();
 
-        expr_stack
+        expr_stack.push(self.atom(0));
+
+        expr_stack[0].clone()
+    }
+
+    // TODO: work in progress
+    pub fn atom(&self, offset: usize) -> ASTNode {
+
+        // number
+        if self.match_sequence(&vec![
+            TokenType::NumberLiteral(String::from("")),
+        ], offset) {
+            let v = match self.get(0).token_type {
+                TokenType::NumberLiteral(v) => v,
+                _                           => panic!("todo: make nice errors - number atom")
+            };
+
+            return ASTNode::NumberLiteral(
+                literals::NumberLiteral::new(
+                    v.parse::<f64>().unwrap()
+                )
+            )
+        } else {
+            return self.expression()
+        }
     }
 
     pub fn match_sequence(&self, sequence: &Vec<TokenType>, offset: usize) -> bool {
@@ -117,7 +133,7 @@ impl Parser {
     }
 
     pub fn get(&self, offset: usize) -> Token {
-        if self.pos + offset > self.tokens.len() {
+        if self.pos + offset > self.tokens.len() - 1 {
             return Token::new(TokenType::EOF, 0, 0)
         }
 

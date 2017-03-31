@@ -5,6 +5,8 @@ use docopt::Docopt;
 use std::io;
 use std::io::prelude::*;
 
+use std::collections::HashMap;
+
 use std::fs::File;
 use std::env;
 
@@ -42,17 +44,13 @@ options:
 fn test_parser(token_stack: Vec<lexer::Token>) {
     let mut parser = ast::Parser::new(token_stack);
 
-    parser.introduce_node(
-        vec![lexer::TokenType::NumberLiteral(String::from(""))],
-        Box::new(NumberLiteral::new(0f64)),
+    let mut hash: HashMap<Vec<lexer::TokenType>, Box<ast::ParserNode>> = HashMap::new();
+
+    hash.insert(
+        vec![lexer::TokenType::NumberLiteral(String::from(""))], Box::new(NumberLiteral::new(0f64))
     );
 
-    parser.introduce_node(
-        vec![lexer::TokenType::StringLiteral(String::from(""))],
-        Box::new(StringLiteral::new(String::from(""))),
-    );
-
-    println!("{:#?}", parser.parse());
+    println!("{:?}", parser.parse(hash));
 }
 
 fn run_repl() {
