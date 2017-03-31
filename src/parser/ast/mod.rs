@@ -20,32 +20,31 @@ pub trait ParserNode: Debug {
 pub struct Parser {
     tokens:     Vec<Token>,
     ast:        Vec<Box<ParserNode>>,
-    pos:        usize,
+    pub pos:        usize,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
-            tokens:     tokens,
-            ast:        Vec::new(),
-            pos:        0,
+            tokens: tokens,
+            ast:    Vec::new(),
+            pos:    0,
         }
     }
 
-    pub fn parse(mut self, signatures: HashMap<Vec<TokenType>, Box<ParserNode>>) -> Option<ASTNode> {
+    pub fn parse(mut self, signatures: &HashMap<Vec<TokenType>, Box<ParserNode>>) -> (Option<ASTNode>, Parser) {
         if self.tokens.len() > 0 {
-            // Immutable borrow occurs here
             let b = match signatures.keys().find(|sig| self.match_sequence(sig, 0)) {
                 Some(v) => signatures.get(&v.clone()).unwrap(),
-                None    => return None,
+                None    => return (None, self),
             };
 
             self.pos += 1;
 
-            return Some(b.parse(&mut self)) // Conflicts immutable borrow that ends ...
-        } // ... here
+            return (Some(b.parse(&mut self)), self)
+        }
 
-        None
+        (None, self)
     }
 
     // TODO: work in progress

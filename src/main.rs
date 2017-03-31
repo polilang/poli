@@ -42,15 +42,31 @@ options:
 ";
 
 fn test_parser(token_stack: Vec<lexer::Token>) {
-    let mut parser = ast::Parser::new(token_stack);
-
     let mut hash: HashMap<Vec<lexer::TokenType>, Box<ast::ParserNode>> = HashMap::new();
 
     hash.insert(
         vec![lexer::TokenType::NumberLiteral(String::from(""))], Box::new(NumberLiteral::new(0f64))
     );
 
-    println!("{:?}", parser.parse(hash));
+    hash.insert(
+        vec![lexer::TokenType::StringLiteral(String::from(""))], Box::new(StringLiteral::new(String::from("")))
+    );
+
+    let mut done = false;
+    let mut pos  = 0usize;
+
+    while !done {
+        let mut parser = ast::Parser::new(token_stack.clone());
+        parser.pos     = pos;
+
+        let (node, p) = parser.parse(&hash);
+        pos = p.pos;
+
+        match node {
+            None => done = true,
+            _    => (),
+        }
+    }
 }
 
 fn run_repl() {
