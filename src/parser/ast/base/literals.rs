@@ -41,7 +41,7 @@ impl ParserNode for StringLiteral {
     fn parse(&self, p: &mut Parser) -> ASTNode {
         match p.get_backward(1).token_type {
             TokenType::StringLiteral(v) => ASTNode::StringLiteral(StringLiteral::new(v)),
-            _                           => panic!("todo: make nice errors - number parser")
+            _                           => panic!("todo: make nice errors - string parser")
         }
     }
 }

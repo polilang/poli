@@ -33,13 +33,19 @@ pub struct Parser {
 }
 
 #[derive(Debug)]
+pub enum SignatureKey {
+    Only(TokenType),
+    Any(Vec<TokenType>),
+}
+
+#[derive(Debug)]
 pub struct Signature {
-    key:  Vec<TokenType>,
+    key:  Vec<SignatureKey>,
     node: Box<ParserNode>,
 }
 
 impl Signature {
-    pub fn new(key: Vec<TokenType>, node: Box<ParserNode>) -> Signature {
+    pub fn new(key: Vec<SignatureKey>, node: Box<ParserNode>) -> Signature {
         Signature {
             key:  key,
             node: node,
@@ -90,8 +96,10 @@ impl Parser {
     pub fn parse(mut self, pool: &SignaturePool) -> (Option<ASTNode>, Parser) {
         if self.tokens.len() > 0 {
             for sig in &pool.signatures {
-                if self.match_sequence(&sig.key, 0) {
-                    self.pos += 1;
+                let len = sig.key.len();
+
+                if self.match_signature(&sig.key, 0) {
+                    self.pos += len;
 
                     return (Some(sig.node.parse(&mut self)), self)
                 }
@@ -102,7 +110,7 @@ impl Parser {
     }
 
     // TODO: work in progress
-    pub fn expression(&self, offset: usize) -> Option<ASTNode> {
+    pub fn expression(&mut self, offset: usize) -> Option<ASTNode> {
         let mut expr_stack: Vec<ASTNode> = Vec::new();
 
         match self.atom(offset) {
@@ -114,13 +122,13 @@ impl Parser {
     }
 
     // TODO: work in progress
-    pub fn atom(&self, offset: usize) -> Option<ASTNode> {
+    pub fn atom(&mut self, offset: usize) -> Option<ASTNode> {
 
         // number
-        if self.match_sequence(&vec![
-            TokenType::NumberLiteral(String::from("")),
+        if self.match_signature(&vec![
+            SignatureKey::Only(TokenType::NumberLiteral(String::from(""))),
         ], offset) {
-            let v = match self.get(0).token_type {
+            let v = match self.get(offset).token_type {
                 TokenType::NumberLiteral(v) => v,
                 _                           => panic!("todo: make nice errors - number atom")
             };
@@ -137,49 +145,26 @@ impl Parser {
         None
     }
 
-    pub fn match_sequence(&self, sequence: &Vec<TokenType>, offset: usize) -> bool {
-        let mut off = 0 + offset;
+    pub fn match_signature(&mut self, sequence: &Vec<SignatureKey>, offset: usize) -> bool {
+        'seq: for e in sequence {
+            let b = self.get(offset).token_type;
 
-        for e in sequence {
-            let t = self.get(off).token_type;
-
-            match e.clone() {
-                TokenType::Keyword(k) => match t {
-                    TokenType::Keyword(k1) => {
-                        if k != k1 {
-                            return false
-                        }
-                    },
-
-                    _ => return false,
-                },
-
-                TokenType::Identifier(_) => match t {
-                    TokenType::Identifier(_) => (),
-                    _                        => return false,
-                },
-
-                TokenType::NumberLiteral(_) => match t {
-                    TokenType::NumberLiteral(_) => (),
-                    _                           => return false,
-                },
-
-                TokenType::StringLiteral(_) => match t {
-                    TokenType::StringLiteral(_) => (),
-                    _                           => return false,
-                },
-
-                TokenType::BinaryOp(_) => match t {
-                    TokenType::BinaryOp(_) => (),
-                    _                      => return false,
-                },
-
-                a => if a != t {
+            match e {
+                &SignatureKey::Only(ref a) => if !match_token(a.clone(), b.clone()) {
                     return false
-                }
-            }
+                },
 
-            off += 1;
+                &SignatureKey::Any(ref va) => {
+
+                    for a in va.iter() {
+                        if match_token(a.clone(), b.clone()) {
+                            break 'seq
+                        }
+                    }
+
+                    return false
+                },
+            }
         }
 
         true
@@ -196,4 +181,49 @@ impl Parser {
     pub fn get_backward(&self, offset: usize) -> Token {
         self.tokens[self.pos - offset].clone()
     }
+}
+
+fn match_token(a: TokenType, b: TokenType) -> bool {
+    match a {
+        TokenType::Keyword(k) => match b {
+            TokenType::Keyword(k1) => {
+                if k != k1 {
+                    return false
+                }
+            },
+
+            _ => return false,
+        },
+
+        TokenType::Identifier(_) => match b {
+            TokenType::Identifier(_) => (),
+            _                        => return false,
+        },
+
+        TokenType::NumberLiteral(_) => match b {
+            TokenType::NumberLiteral(_) => (),
+            _                           => return false,
+        },
+
+        TokenType::StringLiteral(_) => match b {
+            TokenType::StringLiteral(_) => (),
+            _                           => return false,
+        },
+
+        TokenType::BinaryOp(_) => match b {
+            TokenType::BinaryOp(_) => (),
+            _                      => return false,
+        },
+
+        TokenType::Block(_) => match b {
+            TokenType::Block(_) => (),
+            _                   => return false,
+        },
+
+        s => if s != b {
+            return false
+        }
+    }
+
+    true
 }

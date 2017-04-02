@@ -19,12 +19,14 @@ impl Assignment {
 
 impl ParserNode for Assignment {
     fn parse(&self, p: &mut Parser) -> ASTNode {
-        p.pos -= 1;
+        p.pos -= 3;
 
         let content = match (p.expression(0), p.expression(2)) {
             (Some(left), Some(right)) => Assignment::new(Box::new(left), Box::new(right)),
             _                         => panic!("todo: make nice errors - assignment parser"),
         };
+
+        p.pos += 3;
 
         ASTNode::Assignment(content)
     }
