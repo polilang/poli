@@ -19,8 +19,6 @@ use ast::base::literals::{
     NumberLiteral, StringLiteral
 };
 
-use ast::base::assignment::Assignment;
-
 mod compiler;
 use compiler::Module;
 
@@ -64,7 +62,7 @@ fn test_parser(token_stack: Vec<lexer::Token>) {
 
     let mut pos = 0usize;
 
-    loop {
+    for _ in 0 .. token_stack.len() {
         let mut parser = ast::Parser::new(token_stack.clone());
         parser.pos     = pos;
 
@@ -72,7 +70,7 @@ fn test_parser(token_stack: Vec<lexer::Token>) {
         pos = p.pos;
 
         match node {
-            None => break,
+            None => (),
             _    => println!("node: {:#?}", node),
         }
     }

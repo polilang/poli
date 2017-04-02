@@ -141,6 +141,20 @@ impl Parser {
                 )
             )
         }
+        
+        // string
+        if self.match_signature(&vec![
+            SignatureKey::Only(TokenType::StringLiteral(String::from(""))),
+        ], offset) {
+            let v = match self.get(offset).token_type {
+                TokenType::StringLiteral(v) => v,
+                _                           => panic!("todo: make nice errors - number atom")
+            };
+
+            return Some(
+                ASTNode::StringLiteral(literals::StringLiteral::new(v))
+            )
+        }
 
         None
     }
