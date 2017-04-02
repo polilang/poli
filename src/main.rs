@@ -5,8 +5,6 @@ use docopt::Docopt;
 use std::io;
 use std::io::prelude::*;
 
-use std::collections::HashMap;
-
 use std::fs::File;
 use std::env;
 
@@ -42,29 +40,36 @@ options:
 ";
 
 fn test_parser(token_stack: Vec<lexer::Token>) {
-    let mut hash: HashMap<Vec<lexer::TokenType>, Box<ast::ParserNode>> = HashMap::new();
+    let mut sigs: Vec<ast::Signature> = Vec::new();
 
-    hash.insert(
-        vec![lexer::TokenType::NumberLiteral(String::from(""))], Box::new(NumberLiteral::new(0f64))
+    sigs.push(
+        ast::Signature::new(
+            vec![lexer::TokenType::NumberLiteral(String::from(""))],
+            Box::new(NumberLiteral::new(0f64))
+        )
     );
 
-    hash.insert(
-        vec![lexer::TokenType::StringLiteral(String::from(""))], Box::new(StringLiteral::new(String::from("")))
+    sigs.push(
+        ast::Signature::new(
+            vec![lexer::TokenType::StringLiteral(String::from(""))],
+            Box::new(StringLiteral::new(String::from("")))
+        )
     );
 
-    let mut done = false;
-    let mut pos  = 0usize;
+    let pool = ast::create_pool(sigs);
 
-    while !done {
+    let mut pos = 0usize;
+
+    loop {
         let mut parser = ast::Parser::new(token_stack.clone());
         parser.pos     = pos;
 
-        let (node, p) = parser.parse(&hash);
+        let (node, p) = parser.parse(&pool);
         pos = p.pos;
 
         match node {
-            None => done = true,
-            _    => (),
+            None => break,
+            _    => println!("node: {:#?}", node),
         }
     }
 }

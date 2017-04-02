@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub mod base;
 use self::base::literals;
+use self::base::assignment;
 
 use lexer::{Token, TokenType};
 
@@ -10,17 +10,47 @@ use lexer::{Token, TokenType};
 pub enum ASTNode {
     NumberLiteral(literals::NumberLiteral),
     StringLiteral(literals::StringLiteral),
+    Assignment(assignment::Assignment),
 }
 
 pub trait ParserNode: Debug {
-    fn parse(&self, parser: &Parser) -> ASTNode;
+    fn parse(&self, parser: &mut Parser) -> ASTNode;
 }
 
 #[derive(Debug)]
 pub struct Parser {
     tokens:     Vec<Token>,
     ast:        Vec<Box<ParserNode>>,
-    pub pos:        usize,
+    pub pos:    usize,
+}
+
+#[derive(Debug)]
+pub struct Signature {
+    key:  Vec<TokenType>,
+    node: Box<ParserNode>,
+}
+
+impl Signature {
+    pub fn new(key: Vec<TokenType>, node: Box<ParserNode>) -> Signature {
+        Signature {
+            key:  key,
+            node: node,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct SignaturePool {
+    signatures: Vec<Signature>,
+    longest:    usize,
+}
+
+pub fn create_pool(signatures: Vec<Signature>) -> SignaturePool {
+    // TODO: automate sorting
+    SignaturePool {
+        signatures: signatures,
+        longest:    0,
+    }
 }
 
 impl Parser {
@@ -32,32 +62,34 @@ impl Parser {
         }
     }
 
-    pub fn parse(mut self, signatures: &HashMap<Vec<TokenType>, Box<ParserNode>>) -> (Option<ASTNode>, Parser) {
+    pub fn parse(mut self, pool: &SignaturePool) -> (Option<ASTNode>, Parser) {
         if self.tokens.len() > 0 {
-            let b = match signatures.keys().find(|sig| self.match_sequence(sig, 0)) {
-                Some(v) => signatures.get(&v.clone()).unwrap(),
-                None    => return (None, self),
-            };
+            for sig in &pool.signatures {
+                if self.match_sequence(&sig.key, 0) {
+                    self.pos += 1;
 
-            self.pos += 1;
-
-            return (Some(b.parse(&mut self)), self)
+                    return (Some(sig.node.parse(&mut self)), self)
+                }
+            }
         }
 
         (None, self)
     }
 
     // TODO: work in progress
-    pub fn expression(&self) -> ASTNode {
+    pub fn expression(&self, offset: usize) -> Option<ASTNode> {
         let mut expr_stack: Vec<ASTNode> = Vec::new();
 
-        expr_stack.push(self.atom(0));
+        match self.atom(offset) {
+            Some(v) => expr_stack.push(v),
+            None    => (),
+        }
 
-        expr_stack[0].clone()
+        Some(expr_stack[0].clone())
     }
 
     // TODO: work in progress
-    pub fn atom(&self, offset: usize) -> ASTNode {
+    pub fn atom(&self, offset: usize) -> Option<ASTNode> {
 
         // number
         if self.match_sequence(&vec![
@@ -68,14 +100,16 @@ impl Parser {
                 _                           => panic!("todo: make nice errors - number atom")
             };
 
-            return ASTNode::NumberLiteral(
-                literals::NumberLiteral::new(
-                    v.parse::<f64>().unwrap()
+            return Some(
+                ASTNode::NumberLiteral(
+                    literals::NumberLiteral::new(
+                        v.parse::<f64>().unwrap()
+                    )
                 )
             )
-        } else {
-            return self.expression()
         }
+
+        None
     }
 
     pub fn match_sequence(&self, sequence: &Vec<TokenType>, offset: usize) -> bool {
@@ -85,43 +119,38 @@ impl Parser {
             let t = self.get(off).token_type;
 
             match e.clone() {
-                TokenType::Keyword(k) => {
-                    match t {
-                        TokenType::Keyword(k1) => {
-                            if k != k1 {
-                                return false
-                            }
-                        },
+                TokenType::Keyword(k) => match t {
+                    TokenType::Keyword(k1) => {
+                        if k != k1 {
+                            return false
+                        }
+                    },
 
-                        _ => return false,
-                    }
+                    _ => return false,
                 },
 
-                TokenType::Identifier(_) => {
-                    match t {
-                        TokenType::Identifier(_) => (),
-                        _                        => return false,
-                    }
+                TokenType::Identifier(_) => match t {
+                    TokenType::Identifier(_) => (),
+                    _                        => return false,
                 },
 
-                TokenType::NumberLiteral(_) => {
-                    match t {
-                        TokenType::NumberLiteral(_) => (),
-                        _                           => return false,
-                    }
+                TokenType::NumberLiteral(_) => match t {
+                    TokenType::NumberLiteral(_) => (),
+                    _                           => return false,
                 },
 
-                TokenType::StringLiteral(_) => {
-                    match t {
-                        TokenType::StringLiteral(_) => (),
-                        _                           => return false,
-                    }
+                TokenType::StringLiteral(_) => match t {
+                    TokenType::StringLiteral(_) => (),
+                    _                           => return false,
                 },
 
-                a => {
-                    if a != t {
-                        return false
-                    }
+                TokenType::BinaryOp(_) => match t {
+                    TokenType::BinaryOp(_) => (),
+                    _                      => return false,
+                },
+
+                a => if a != t {
+                    return false
                 }
             }
 
