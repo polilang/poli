@@ -18,15 +18,21 @@ color statement "\b(print|input)\b"
 color statement "\b(do|while|if|elif|else|for|in|return|continue|break)\b"
 
 # Standard library
-color special "\b(std|list|range)\b"
+color special "\b(std|iterables)\b"
+
+   # libstd iterables
+   color statement "\b(range)\b"
+
+   # libstd iterables/for-extensions
+   color statement "\b(while|switch)\b"
 
 # Methods
-color statement "\.\b(.+?)\b"
+# color statement "\.\b(.+?)\b"
 
 # Logic
 color special "\b(not|and|or)\b"
 
-# false, nil, true
+# false, null, true
 color constant.bool "\b(false|null|true)\b"
 
 # Numbers
@@ -34,15 +40,28 @@ color constant.number "\b([0-9]+)\b"
 
 # Symbols
 color symbol "(\(|\)|\[|\]|\{|\}|\*|/|%|\+|-|\^|>|<|=|!|,)"
+color special "(->|\.\.\.)"
+
+# Classes
+color constant "(^)\b(\S+?)\b\:"
+
+# Class Specials
+color special "(\!\!)\b(new|next)\b" #special
+color special "(\!\!)\b(eq|ne|lt|gt|le|ge)\b" #comparison
+color special "(\!\!)\b(add|sub|mul|div|mod|pow|neg)\b" #math
+color special "(\!\!)\b(and|or|not)\b" #boolean
 
 # Strings
 color constant.string "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
 
 # Multiline strings
 color constant.string start="\s*(\"\"\")" end="(\"\"\")"
+color constant.string start="\s*(''')" end="(''')"
 
 # Escapes
 color special "\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]|\\[abefnrs]|(\\c|\\C-|\\M-|\\M-\\C-)."
 
 # Comment
 color comment "\~.*$"
+color comment start="\s*(~~~)" end="(~~~)"
+

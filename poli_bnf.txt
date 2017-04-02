@@ -44,17 +44,18 @@ dot     :=  .
 
 
 
-word    := <alpha | digit | uscore | dot> {<word>}
+word    :=  <alpha | digit | uscore | dot> {<word>}
 
-param   := <word> {, <param>}
-args    := <expr> {, <expr>}
+param   :=  <word> {, <param>}
+args    :=  <expr> {, <expr>}
 
-atom    := <string | number | bool | word | fn-call>
+atom    :=  <string | number | bool | word | fn-call>
 
-expr    := <atom> {<op> <expr>}
-exp-bool:= <atom> {<op-bool> <exp-bool>}
+expr    :=  <atom> {<op> <expr>}
+exp-bool:=  <atom> {<op-bool> <exp-bool>}
+exp-math:=  <atom> {<op-math> <exp-math>}
 
-if      :=  if <exp-bool> -> <statement>
+if      :=  if <exp-bool> <arrow> <statement>
         |   if <exp-bool>
                 <block>
             {elif <exp-bool>
@@ -66,14 +67,9 @@ for     :=  for {<param> in} <iterable> <arrow> <statement>
         |   for {<param> in} <iterable>
                 <block>
 
-while   :=  while <exp-bool> <arrow> <statement>
-        |   while <exp-bool>
-                <block>
+lambda  :=  <lparen> {<param>} <colon> {return} <expr> <rparen>
 
-lambda  :=  <bar | lparen> {<param>} <colon> {return} <expr> <bar | rparen>
-
-fn-def  :=  <lambda>
-        |   <word> <assign> {<param>} <colon> {return} <expr>
+fn-def  :=  <word> <assign> {<param>} <colon> {return} <expr>
         |   <word> <assign> {<param>} <colon>
                 <block>
                 {return <expr>}
@@ -86,6 +82,6 @@ assignmt:=  <param> <assign> <args>
 class   :=  <word> <colon>
                 <block>
 
-cls-word:=  <dot> <word>
+import  :=  with <param> {from <word>}
 
-
+ffi     :=  with <dynamic-link-library> from ffi
