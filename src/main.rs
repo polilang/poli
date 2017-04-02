@@ -101,7 +101,7 @@ fn run_repl() {
 
                 println!("=> {:#?}", root_chunk);
 
-                test_parser(lexer::Lexer::tokenize(&input_line))
+                test_parser(ast::flatten_branch(&root_chunk))
             },
 
             Err(e) => panic!(e),
@@ -156,7 +156,8 @@ fn run_block_tree(path: &str) {
         &tree.make_tree(&collection),
     );
 
-    println!("{:#?}", root_chunk)
+    println!("root: {:#?}", root_chunk);
+    println!("flat: {:#?}", ast::flatten_branch(&root_chunk))
 }
 
 fn main() {

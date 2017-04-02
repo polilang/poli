@@ -4,7 +4,15 @@ pub mod base;
 use self::base::literals;
 use self::base::assignment;
 
-use lexer::{Token, TokenType};
+use lexer::{
+    Token,
+    TokenType,
+};
+
+use parser::block_tree::{
+    Branch,
+    ChunkContent,
+};
 
 #[derive(Debug, Clone)]
 pub enum ASTNode {
@@ -52,6 +60,23 @@ pub fn create_pool(signatures: Vec<Signature>) -> SignaturePool {
         longest:    0,
     }
 }
+
+pub fn flatten_branch<'a>(branch: &Branch<'a>) -> Vec<Token> {
+    let mut flat: Vec<Token> = Vec::new();
+
+    for chunk in branch.content.iter() {
+        match chunk.content {
+            ChunkContent::Tokens(ref t)    => flat.append(&mut t.clone()),
+            ChunkContent::Block(ref b) => flat.push(
+                    Token::new(TokenType::Block(flatten_branch(b)), 0, 0)
+                ),
+            _                          => (),
+        }
+    }
+
+    flat
+}
+
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {

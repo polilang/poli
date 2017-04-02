@@ -5,13 +5,16 @@ use parser::block_tree::{
     Chunk,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TokenType {
     Identifier(String),
     StringLiteral(String),
     NumberLiteral(String),
     Keyword(String),
     BinaryOp(String),
+
+    Block(Vec<Token>),
+
     Colon,
     Semicolon,
     Comma,
@@ -42,7 +45,7 @@ pub enum BinaryOp {
     GtEquals,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Token {
     pub token_type: TokenType,
     pub span:       Span,
