@@ -4,10 +4,10 @@ Apple:
   new =:
     ~ this is a comment
     string .size = "v big and juicy"
-    .name = "sabri" 
+    .name = "sabri"
 
   make_greeting = name :
     print "yes hello, " + name
 
-apple? = Apple()
-apple?.make_greeting "niql"
+apple = Apple()
+apple.make_greeting "niql"
