@@ -16,7 +16,7 @@ use parser::block_tree::{
 };
 
 use ast::base::literals::{
-    NumberLiteral, StringLiteral
+    NumberLiteral, StringLiteral, BooleanLiteral,
 };
 
 mod compiler;
@@ -41,6 +41,15 @@ options:
 
 fn test_parser(token_stack: Vec<lexer::Token>) {
     let mut sigs: Vec<ast::Signature> = Vec::new();
+
+    sigs.push(
+        ast::Signature::new(
+            vec![ast::SignatureKey::Any(
+                    vec![lexer::TokenType::Keyword(String::from("true")), lexer::TokenType::Keyword(String::from("false"))]
+                )],
+            Box::new(BooleanLiteral::new(false))
+        )
+    );
 
     sigs.push(
         ast::Signature::new(

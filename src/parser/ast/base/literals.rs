@@ -45,3 +45,28 @@ impl ParserNode for StringLiteral {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct BooleanLiteral {
+    value: bool,
+}
+
+impl BooleanLiteral {
+    pub fn new(value: bool) -> BooleanLiteral {
+        BooleanLiteral {
+            value: value,
+        }
+    }
+}
+
+impl ParserNode for BooleanLiteral {
+    fn parse(&self, p: &mut Parser) -> ASTNode {
+        match p.get_backward(1).token_type {
+            TokenType::Keyword(v) => {
+                ASTNode::BooleanLiteral(BooleanLiteral::new(v == String::from("true")))
+            },
+
+            _ => panic!("todo: make nice errors - boolean parser"),
+        }
+    }
+}

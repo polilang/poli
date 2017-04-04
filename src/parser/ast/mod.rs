@@ -2,7 +2,6 @@ use std::fmt::Debug;
 
 pub mod base;
 use self::base::literals;
-use self::base::assignment;
 
 use lexer::{
     Token,
@@ -18,7 +17,7 @@ use parser::block_tree::{
 pub enum ASTNode {
     NumberLiteral(literals::NumberLiteral),
     StringLiteral(literals::StringLiteral),
-    Assignment(assignment::Assignment),
+    BooleanLiteral(literals::BooleanLiteral),
 }
 
 pub trait ParserNode: Debug {
