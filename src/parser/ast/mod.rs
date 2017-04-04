@@ -155,6 +155,23 @@ impl Parser {
             )
         }
 
+        // bool
+        if self.match_signature(&vec![
+            SignatureKey::Any(
+                vec![TokenType::Keyword(String::from("true")), TokenType::Keyword(String::from("false"))]
+            ),
+        ], offset) {
+            let v = match self.get(offset).token_type {
+                TokenType::Keyword(v) => v == String::from("true"),
+
+                _ => panic!("todo: make nice errors - boolean atom"),
+            };
+
+            return Some(
+                ASTNode::BooleanLiteral(literals::BooleanLiteral::new(v))
+            )
+        }
+
         None
     }
 

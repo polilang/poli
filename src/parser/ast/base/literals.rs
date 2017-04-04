@@ -62,11 +62,8 @@ impl BooleanLiteral {
 impl ParserNode for BooleanLiteral {
     fn parse(&self, p: &mut Parser) -> ASTNode {
         match p.get_backward(1).token_type {
-            TokenType::Keyword(v) => {
-                ASTNode::BooleanLiteral(BooleanLiteral::new(v == String::from("true")))
-            },
-
-            _ => panic!("todo: make nice errors - boolean parser"),
+            TokenType::Keyword(v) => ASTNode::BooleanLiteral(BooleanLiteral::new(v == String::from("true"))),
+            _                     => panic!("todo: make nice errors - boolean parser"),
         }
     }
 }
