@@ -95,11 +95,8 @@ impl Parser {
     pub fn parse(mut self, pool: &SignaturePool) -> (Option<ASTNode>, Parser) {
         if self.tokens.len() > 0 {
             for sig in &pool.signatures {
-                let len = sig.key.len();
 
                 if self.match_signature(&sig.key, 0) {
-                    self.pos += len;
-
                     return (Some(sig.node.parse(&mut self)), self)
                 }
             }
@@ -196,6 +193,8 @@ impl Parser {
                 },
             }
         }
+
+        self.pos += sequence.len();
 
         true
     }
