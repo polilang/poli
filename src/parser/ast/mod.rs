@@ -1,11 +1,14 @@
 use std::fmt::Debug;
 
 pub mod base;
-use self::base::literals;
+use self::base::{
+    literals, operator
+};
 
 use lexer::{
     Token,
     TokenType,
+    BinaryOp,
 };
 
 use parser::block_tree::{
@@ -18,6 +21,12 @@ pub enum ASTNode {
     NumberLiteral(literals::NumberLiteral),
     StringLiteral(literals::StringLiteral),
     BooleanLiteral(literals::BooleanLiteral),
+
+    Operator(operator::Operator),
+
+    BinaryOp((BinaryOp, u8)),
+
+    Not,
 }
 
 pub trait ParserNode: Debug {
@@ -82,7 +91,6 @@ pub fn flatten_branch<'a>(branch: &Branch<'a>) -> Vec<Token> {
     flat
 }
 
-
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
@@ -106,25 +114,81 @@ impl Parser {
     }
 
     // TODO: work in progress
-    pub fn expression(&mut self, offset: usize) -> Option<ASTNode> {
+    pub fn expression(&mut self) -> Option<ASTNode> {
         let mut expr_stack: Vec<ASTNode> = Vec::new();
 
-        match self.atom(offset) {
+        if self.match_signature(&vec![SignatureKey::Only(TokenType::Bang)], 0) {
+            expr_stack.push(ASTNode::Not)
+        }
+
+        match self.atom() {
             Some(v) => expr_stack.push(v),
             None    => (),
         }
 
-        Some(expr_stack[0].clone())
+        while self.match_signature(&vec![
+                    SignatureKey::Only(TokenType::BinaryOp(String::from(""))),
+                ], 0) {
+
+            let (oper, prec) = match self.get_backward(1).token_type {
+                TokenType::BinaryOp(s) => super::lexer::bin_op(&s).unwrap(),
+                _                      => panic!("todo: make nice errors - operation expression expected")
+            };
+
+            expr_stack.push(ASTNode::BinaryOp((oper, prec)));
+
+            expr_stack.push(self.atom().unwrap())
+        }
+
+        let mut index: usize = 0;        
+
+        for op in expr_stack.clone().iter().cloned() {
+
+            index += 1;
+
+            match op {
+                ASTNode::BinaryOp((_, _)) => {
+                    println!("hrmhrm: index = {}", index);
+                    let mut oper = vec!(ASTNode::Operator(
+                                            operator::Operator::new(
+                                                Box::new(expr_stack[index - 3].clone()),
+                                                Box::new(expr_stack[index - 2].clone()),
+                                                Box::new(expr_stack[index - 1].clone()),
+                                            )
+                                        )
+                                    );
+
+                    println!("found operation: => \n    {:#?}", oper);
+
+                    expr_stack.clone()[..index - 2].to_vec().append(&mut oper);
+                    
+                    index -= 1
+                },
+                _ => ()
+            }
+
+            index += 1
+        }
+
+        if expr_stack.len() > 0 {
+            println!("expression stack: => \n{:#?}", expr_stack)
+        }
+
+        match expr_stack.len() {
+            0 => None,
+            _ => Some(expr_stack[0].clone()),
+        }
     }
 
     // TODO: work in progress
-    pub fn atom(&mut self, offset: usize) -> Option<ASTNode> {
+    pub fn atom(&mut self) -> Option<ASTNode> {
 
         // number
         if self.match_signature(&vec![
             SignatureKey::Only(TokenType::NumberLiteral(String::from(""))),
-        ], offset) {
-            let v = match self.get(offset).token_type {
+        ], 0) {
+
+            let v = match self.get_backward(1).token_type {
                 TokenType::NumberLiteral(v) => v,
                 _                           => panic!("todo: make nice errors - number atom")
             };
@@ -141,10 +205,10 @@ impl Parser {
         // string
         if self.match_signature(&vec![
             SignatureKey::Only(TokenType::StringLiteral(String::from(""))),
-        ], offset) {
-            let v = match self.get(offset).token_type {
+        ], 0) {
+            let v = match self.get_backward(1).token_type {
                 TokenType::StringLiteral(v) => v,
-                _                           => panic!("todo: make nice errors - number atom")
+                _                           => panic!("todo: make nice errors - string atom")
             };
 
             return Some(
@@ -157,8 +221,8 @@ impl Parser {
             SignatureKey::Any(
                 vec![TokenType::Keyword(String::from("true")), TokenType::Keyword(String::from("false"))]
             ),
-        ], offset) {
-            let v = match self.get(offset).token_type {
+        ], 0) {
+            let v = match self.get_backward(1).token_type {
                 TokenType::Keyword(v) => v == String::from("true"),
 
                 _ => panic!("todo: make nice errors - boolean atom"),

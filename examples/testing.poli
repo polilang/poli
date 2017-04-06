@@ -1,13 +1,8 @@
-~ i am a comment, yes hello
-~ another comment
-Apple:
-  new =:
-    ~ this is a comment
-    string .size = "v big and juicy"
-    .name = "sabri"
+fib = i :
+  if i < 3
+    return i
+  return fib(i - 1) + fib(i - 2)
 
-  make_greeting = name :
-    print "yes hello, " + name
-
-apple = Apple()
-apple.make_greeting "niql"
+something = 10 * 10 * (
+    1 + 1
+  )

@@ -28,6 +28,8 @@ pub enum TokenType {
     Assign,
     Invalid,
 
+    Bang,
+
     EOF,
 }
 
@@ -360,19 +362,19 @@ fn keyword(k: &str) -> Option<TokenType> {
     }
 }
 
-fn bin_op(v: &str) -> Option<(BinaryOp, u8)> {
+pub fn bin_op(v: &str) -> Option<(BinaryOp, u8)> {
     match v {
-        "*"  => Some((BinaryOp::Mul, 1)),
-        "/"  => Some((BinaryOp::Div, 1)),
-        "+"  => Some((BinaryOp::Plus, 2)),
-        "-"  => Some((BinaryOp::Minus, 2)),
-        "==" => Some((BinaryOp::Equals, 4)),
-        "~=" => Some((BinaryOp::NotEquals, 4)),
-        "<"  => Some((BinaryOp::Lt, 4)),
-        ">"  => Some((BinaryOp::Gt, 4)),
-        "<=" => Some((BinaryOp::GtEquals, 4)),
-        ">=" => Some((BinaryOp::LtEquals, 4)),
-        _    => None,
+        "*"   => Some((BinaryOp::Mul, 1)),
+        "/"   => Some((BinaryOp::Div, 1)),
+        "+"   => Some((BinaryOp::Plus, 2)),
+        "-"   => Some((BinaryOp::Minus, 2)),
+        "=="  => Some((BinaryOp::Equals, 4)),
+        "!="  => Some((BinaryOp::NotEquals, 4)),
+        "<"   => Some((BinaryOp::Lt, 4)),
+        ">"   => Some((BinaryOp::Gt, 4)),
+        "<="  => Some((BinaryOp::GtEquals, 4)),
+        ">="  => Some((BinaryOp::LtEquals, 4)),
+        _     => None,
     }
 }
 
@@ -389,6 +391,7 @@ fn symbol(v: &char) -> Option<TokenType> {
         ';'  => Some(TokenType::Semicolon),
         '.'  => Some(TokenType::Period),
         '='  => Some(TokenType::Assign),
+        '!'  => Some(TokenType::Bang),
         _    => None,
     }
 }

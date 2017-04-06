@@ -75,6 +75,8 @@ fn test_parser(token_stack: Vec<lexer::Token>) {
         let mut parser = ast::Parser::new(token_stack.clone());
         parser.pos     = pos;
 
+        println!("expr: => \n {:#?}", parser.expression());
+
         let (node, p) = parser.parse(&pool);
         pos = p.pos;
 
