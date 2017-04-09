@@ -1,8 +1,3 @@
-fib = i :
+foo = a, b :
   if i < 3
-    return i
-  return fib(i - 1) + fib(i - 2)
-
-something = 10 * 10 * (
-    1 + 1
-  )
+    a = 1

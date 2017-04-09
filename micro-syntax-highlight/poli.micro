@@ -2,7 +2,6 @@
 # ~/.config/micro/syntax/poli.micro
 # Date: 17-03-24
 
-
 syntax "poli" ".*\.poli"
 
 

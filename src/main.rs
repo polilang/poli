@@ -9,15 +9,6 @@ use std::fs::File;
 use std::env;
 
 mod parser;
-use parser::lexer;
-use parser::ast;
-use parser::block_tree::{
-    BlockTree
-};
-
-use ast::base::literals::{
-    NumberLiteral, StringLiteral, BooleanLiteral,
-};
 
 mod compiler;
 use compiler::Module;
@@ -39,57 +30,20 @@ options:
     --optimize  optimize compiled LLVM IR
 ";
 
-fn test_parser(token_stack: Vec<lexer::Token>) {
-    let mut sigs: Vec<ast::Signature> = Vec::new();
+fn build(ast: Vec<parser::ast::Statement>, destination: &str) {
 
-    sigs.push(
-        ast::Signature::new(
-            vec![ast::SignatureKey::Any(
-                    vec![lexer::TokenType::Keyword(String::from("true")), lexer::TokenType::Keyword(String::from("false"))]
-                )],
-            Box::new(BooleanLiteral::new(false))
-        )
-    );
+    let module = Module::new("poli");
 
-    sigs.push(
-        ast::Signature::new(
-            vec![ast::SignatureKey::Only(lexer::TokenType::NumberLiteral(String::from("")))],
-            Box::new(NumberLiteral::new(0f64))
-        )
-    );
+    module.write_object(destination);
 
-    sigs.push(
-        ast::Signature::new(
-            vec![ast::SignatureKey::Any(
-                    vec![lexer::TokenType::StringLiteral(String::from("")), lexer::TokenType::Identifier(String::from(""))],
-                )],
-            Box::new(StringLiteral::new(String::from("")))
-        )
-    );
+    println!("=> writing to: {}\n", destination);
+    
+    module.dump();
 
-    let pool = ast::create_pool(sigs);
-
-    let mut pos = 0usize;
-
-    for _ in 0 .. token_stack.len() {
-        let mut parser = ast::Parser::new(token_stack.clone());
-        parser.pos     = pos;
-
-        println!("expr: => \n {:#?}", parser.expression());
-
-        let (node, p) = parser.parse(&pool);
-        pos = p.pos;
-
-        match node {
-            None => (),
-            _    => println!("node: {:#?}", node),
-        }
-    }
+    println!("")
 }
 
-fn run_repl() {
-    println!("the poli language\n");
-
+fn repl() {
     loop {
         print!(">>> ");
         io::stdout().flush().unwrap();
@@ -105,16 +59,8 @@ fn run_repl() {
 
                     std::process::exit(0)
                 }
-
-                let mut tree   = BlockTree::new(&input_line, 0);
-                let collection = tree.collect_indents();
-                let root_chunk = lexer::Lexer::tokenize_branch(
-                    &tree.make_tree(&collection),
-                );
-
-                println!("=> {:#?}", root_chunk);
-
-                test_parser(ast::flatten_branch(&root_chunk))
+                
+                println!("=>\n{:#?}", parse(&input_line));
             },
 
             Err(e) => panic!(e),
@@ -122,59 +68,42 @@ fn run_repl() {
     }
 }
 
-fn run_file(path: &str) {
-    let mut source_file = match File::open(path) {
-        Ok(f)  => f,
-        Err(_) => panic!("failed to open path: {}", path),
-    };
+fn parse(source: &str) -> Vec<parser::ast::Statement> {
+    use parser::block_tree::BlockTree;
 
-    let mut source_buffer = String::new();
-    source_file.read_to_string(&mut source_buffer).unwrap();
+    let mut tree = BlockTree::new(source, 0);
+    let indents  = tree.collect_indents();
 
-    println!("=> ");
+    let root = tree.make_tree(&indents);
 
-    for t in lexer::Lexer::tokenize(&source_buffer) {
-        println!("{:?}", t.token_type)
+    let mut parser = parser::ast::Parser::from(
+             parser::tokenizer::Tokenizer::from(
+                    parser::tokenizer::flatten_tree(
+                            &parser::tokenizer::Tokenizer::tokenize_branch(&root)
+                        ),
+                ),
+        );
+
+    match parser.parse() {
+        Ok(c)  => c,
+        Err(e) => panic!(e),
     }
 }
 
-fn build_file(_: &str, destination: &str) {
-
-    let module = Module::new("poli");
-
-    module.write_object(destination);
-
-    println!("=> writing to: {}\n", destination);
-    
-    module.dump();
-
-    println!("")
-}
-
-fn run_block_tree(path: &str) {
-
-    let mut source_file = match File::open(path) {
+#[allow(unused_must_use)]
+fn file<'a>(source: &str) -> String {
+     let mut source_file = match File::open(source) {
         Ok(f)  => f,
-        Err(_) => panic!("failed to open path: {}", path),
+        Err(_) => panic!("failed to open path: {}", source),
     };
 
     let mut source_buffer = String::new();
     source_file.read_to_string(&mut source_buffer).unwrap();
 
-    println!("=> ");
-
-    let mut tree = BlockTree::new(&source_buffer, 0);
-    let collection = tree.collect_indents();
-    let root_chunk = lexer::Lexer::tokenize_branch(
-        &tree.make_tree(&collection),
-    );
-
-    println!("root: {:#?}", root_chunk);
-    println!("flat: {:#?}", ast::flatten_branch(&root_chunk))
+    source_buffer
 }
 
 fn main() {
-
     let argv: Vec<String> = env::args().collect();
 
     let args = Docopt::new(USAGE)
@@ -182,12 +111,10 @@ fn main() {
                        .unwrap_or_else(|e| e.exit());
 
     if args.get_bool("repl") {
-        run_repl()
+        repl()
     } else if args.get_bool("run") {
-        run_file(args.get_str("<source>"))
+         println!("abstract syntax tree =>\n{:#?}", parse(&file(args.get_str("<source>"))));
     } else if args.get_bool("build") {
-        build_file(args.get_str("<source>"), args.get_str("<destination>"))
-    } else if args.get_bool("trees") {
-        run_block_tree(args.get_str("<source>"))
+        build(parse(&file(args.get_str("<source>"))), args.get_str("<destination>"));
     }
 }

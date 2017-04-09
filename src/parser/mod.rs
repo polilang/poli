@@ -1,3 +1,4 @@
+pub mod token;
 pub mod block_tree;
-pub mod lexer;
+pub mod tokenizer;
 pub mod ast;
