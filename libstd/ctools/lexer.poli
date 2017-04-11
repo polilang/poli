@@ -1,0 +1,48 @@
+TokenType = Enum
+   "Identifier"
+   "String"
+   "Number"
+   "Keyword"
+   "Operator"
+
+   "Block"
+
+   "Colon", "Semicolon"
+   "Period", "Comma"
+
+   "LParen", "RParen"
+   "LBrace", "RBrace"
+   "LBracket", "RBracket"
+
+   "Assign"
+
+   "Invalid"
+
+   "Bang"
+
+   "EOF"
+
+Operator = Enum
+   "Mul", "Div"
+   "Add", "Sub"
+   "Equ", "Neq"
+   "Lst", "Gtt"
+   "Leq", "Geq"
+   "And", "Or",
+   "Not"
+
+Token:
+   !!new = type, row, col, content : .type, .row, .col, .content = type, row, col, content
+
+
+Tokenizer:
+   !!new =:
+      tokens = List()
+      lines = 0
+      start = 0
+      pos = 0
+      top = 0
+
+   push = type, line :
+
+as = ad.asda()

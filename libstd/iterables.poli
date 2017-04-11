@@ -1,16 +1,18 @@
+with banana from fruits
+
 range: ~ python-like range iterable
-   !!new = a, b, step :
+   !new = a, b, step :
       .current = null
 
-      .end = b or a                          ~ range(end)
-      .start = b and (a or 0)                ~ range(start, end)
-      .step = step or (.end<0 and (-1 or 1)) ~ range(start, end, step)
+      .end = b or a                            ~ range(end)
+      .start = b and (a or 0)                  ~ range(start, end)
+      .step = step or (.end < 0 and (-1 or 1)) ~ range(start, end, step)
 
-   !!next =:
+   !next =:
       if not .current   ~ iteration begins, set current
          .current = .start
 
-      elif (            ~ continue iteration if goal isn't reached
+      elif  (           ~ continue iteration if goal isn't reached
             .step > 0 and .current <= .end
             ) or (
             .step < 0 and .current >= .end
@@ -30,11 +32,11 @@ for i in range 10
 
 
 while: ~ for loop "while" extension
-   !!new = cond :
+   !new = cond :
       .condition = cond ~ condition callback
 
-   !!next =:
-      return .condition() or null ~ if condition is true, continue
+   !next =:
+      return .condition(asd) or null ~ if condition is true, continue
 
 ~~~
 a = 1
@@ -61,27 +63,27 @@ for case in switch var
 
 
 myclass:
-   !!new =:
+   !new =:
 
-   !!next =:
+   !next =:
 
-   !!index = ... :
+   !index = ... :
 
-   !!add = other :
-   !!sub = other :
-   !!mul = other :
-   !!div = other :
-   !!pow = other :
-   !!mod = other :
-   !!neg =:
+   !add = other :
+   !sub = other :
+   !mul = other :
+   !div = other :
+   !pow = other :
+   !mod = other :
+   !neg =:
 
-   !!eq = other :
-   !!ne = other :
-   !!lt = other :
-   !!gt = other :
-   !!le = other :
-   !!ge = other :
+   !eq = other :
+   !ne = other :
+   !lt = other :
+   !gt = other :
+   !le = other :
+   !ge = other :
 
-   !!and = other :
-   !!or = other :
-   !!not =:
+   !and = other :
+   !or = other :
+   !not =:

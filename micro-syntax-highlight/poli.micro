@@ -2,34 +2,23 @@
 # ~/.config/micro/syntax/poli.micro
 # Date: 17-03-24
 
+
 syntax "poli" ".*\.poli"
 
 
 # Statements
 
 # External files
-color preproc "(\b(with|from)|%q|%!|%Q|%r|%x)\b"
-
-# Keywords
-color statement "\b(print|input)\b"
+color preproc "\b((with|from)|%q|%!|%Q|%r|%x)\b"
 
 # Flow control
 color statement "\b(do|while|if|elif|else|for|in|return|continue|break)\b"
 
-# Standard library
-color special "\b(std|iterables)\b"
+# method define
+color identifier "\=(.*?)\:"
 
-   # libstd iterables
-   color statement "\b(range)\b"
-
-   # libstd iterables/for-extensions
-   color statement "\b(while|switch)\b"
-
-# Methods
-# color statement "\.\b(.+?)\b"
-
-# Logic
-color special "\b(not|and|or)\b"
+# members
+color identifier "(\w*?\.\w+)"
 
 # false, null, true
 color constant.bool "\b(false|null|true)\b"
@@ -37,18 +26,25 @@ color constant.bool "\b(false|null|true)\b"
 # Numbers
 color constant.number "\b([0-9]+)\b"
 
+# method calls
+color constant "(\w+?\()"
+
+#parens
+color comment "(\(|\)|\[|\]|\{|\})"
 # Symbols
-color symbol "(\(|\)|\[|\]|\{|\}|\*|/|%|\+|-|\^|>|<|=|!|,)"
-color special "(->|\.\.\.)"
+color symbol "(\*|/|%|\+|-|\^|>|<|=|!|,)"
+color symbol "(->|\.\.\.|\:)"
+# Logic
+color symbol "\b(not|and|or)\b"
 
 # Classes
-color constant "(^)\b(\S+?)\b\:"
+color identifier.class "(^)\b(\S+?)\b\:"
 
 # Class Specials
-color special "(\!\!)\b(new|next)\b" #special
-color special "(\!\!)\b(eq|ne|lt|gt|le|ge)\b" #comparison
-color special "(\!\!)\b(add|sub|mul|div|mod|pow|neg)\b" #math
-color special "(\!\!)\b(and|or|not)\b" #boolean
+color special "(\!)\b(new|next|index)\b" #special
+color special "(\!)\b(eq|ne|lt|gt|le|ge)\b" #comparison
+color special "(\!)\b(add|sub|mul|div|mod|pow|neg)\b" #math
+color special "(\!)\b(and|or|not)\b" #boolean
 
 # Strings
 color constant.string "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
