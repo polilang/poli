@@ -1,0 +1,63 @@
+ident    :[a-zA-Z@_?]+
+number   :([0..9]+ ".")? [0..9]+
+string   :\" [^\"]+ \"
+bool     :"true"|"false"
+null     :"null"
+newline  :"\n"
+
+type     :"int"|"str"|"table"|"bool"|"null"|"object"
+atom     :ident|number|string|bool|func-call|table
+
+op-unary :"not"|"-"
+
+operator :"+"|"-"|"*"|"/"|"%"|"^"
+         |"and"|"or"|">"|"<"|">="|"<="|"=="|"!="
+         |".."
+
+expr     :opunary? atom (operator expr)?
+         |"(" expr ")"
+
+assign   :type? ident "=" expr
+
+if       :"if (" expr ")" statement ("else" statement)?
+         |"if" expr newline chunk
+         ("elif" expr newline chunk)*
+         ("else" newline chunk)?
+
+while    :"while (" expr ")" statement
+         |"while" expr newline chunk
+
+break    :"break"
+continue :"continue"
+
+
+params   :"[" (ident ("," ident)*)? type-ret? "]"
+args     :expr ("," expr)*
+         |"(" args? ")"
+
+type-ret :"->" type
+
+func-def :params expr
+         |params newline chunk
+
+func-call:ident args
+
+table    :table-itm ((","|newline) table-itm)+
+         |"{" table-itm|table? "}"
+
+table-itm:expr
+         |ident ":" newline? expr
+
+return   :"return" expr?
+
+statement:assign
+         |if
+         |while
+         |break
+         |continue
+         |func-def
+         |func-call
+         |return
+
+chunk    :statement (newline statement)*
+

@@ -1,0 +1,75 @@
+~ assignment
+~ static
+int bar = 10
+str bar = "asd"
+
+~ dynamic inferred
+bar = 100
+
+~ functions/lambdas
+~ static
+foo = [int a, int b, int c  ->int]
+   return frobnicate(a, b+c)
+
+~ implicit return
+frobnicate = [int a, int b ->int] a * b
+
+~ dynamic
+foo = [a, b, int c] frobnicate(c+b, a)
+foo = [a, b, c] a + b + c
+
+~ inline lambda definition and call
+print( ([a,b ->int] a+b)(1, 2) )
+
+
+~ tables/classes
+~ empty
+table tab = {}
+
+~ table with items
+tab = {1, "asd", foo}
+
+~ keyed table
+tab = {
+   foo: 10
+   bar: 20
+}
+
+~ mixed table
+tab = {
+   1, 2, 3
+   foo: 12
+   33, bar: 10
+}
+
+~ table without braces
+tab =
+   asd: 123
+   boo: 321
+
+~ classes
+class =
+   call!: [self, ...]
+      instance = {index!: self}
+      if (instance.init) instance.init(...)
+      return instance
+
+~ table with metamembers
+bar =
+   index!: class
+
+   init: [self, a, b]
+      .a = a
+      .b = b
+
+   frobnicate: [self] .a + .b
+
+~ "subclassing"
+subaru =
+   index!: bar ~ looks up in `bar` if a method isn't found
+
+   init: [self, a, b, c]
+      bar.init(self, a, b)
+      .c = c
+
+

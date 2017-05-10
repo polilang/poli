@@ -1,89 +1,58 @@
-with banana from fruits
+with class from class
 
-range: ~ python-like range iterable
-   !new = a, b, step :
-      .current = null
 
-      .end = b or a                            ~ range(end)
-      .start = b and (a or 0)                  ~ range(start, end)
-      .step = step or (.end < 0 and (-1 or 1)) ~ range(start, end, step)
+for = [iter, body] ~ generic "for" iterator function
+   while true
+      ... = iter.next()
+      if (not ...) break
+      body(...)
 
-   !next =:
-      if not .current   ~ iteration begins, set current
-         .current = .start
 
-      elif  (           ~ continue iteration if goal isn't reached
-            .step > 0 and .current <= .end
-            ) or (
-            .step < 0 and .current >= .end
-            )
-         .current += .step
 
-      else              ~ iteration end
+range = ~ range iterable class
+   index!: class ~ make `range` a class
+
+   init: [self, int a, int b, int step]
+      int .start = b and a or 0
+      int .end   = b or a
+      int .step  = step or .end<0 and -1 or 1
+      int .curr  = null
+
+   next: [self ->int]
+      if not .current
+         if (.curr == .start) return null
+         .curr = .start
+
+      elif (.step>0 and .curr<=.end) or (.step<0 and .curr>=.end)
+         .curr += .step
+
+      else
          return null
 
-      return .current
+      return .curr
 
 ~~~
-for i in range 10
-    print i
-~~~
-
-
-
-while: ~ for loop "while" extension
-   !new = cond :
-      .condition = cond ~ condition callback
-
-   !next =:
-      return .condition(asd) or null ~ if condition is true, continue
-
-~~~
-a = 1
-for while(: a<10)
-    print a++
+for range(10), []
+    stdout.write(i)
 ~~~
 
 
 
-switch = item : ~ for loop "switch" extension ; [ comparison-callback, null ]
-   return list (... : for i in ... -> if i == item -> return true), null
+switch =
+   index!: class
+
+   init: [self, value => int]   .value = value
+   next: [self] [other => bool] .value == other
+   return {case}    ~ return an iterable so it can be used with 'for'
 
 ~~~
-for case in switch var
+for switch(var), [case]
    if case 1
-      print "case 1"
+      stdout.write "case 1"
       break
    if case 2, 3
-      print "case 2 or 3"
+      stdout.write "case 2 or 3"
       break
 
-   print "default"
+   stdout.write "default"
 ~~~
-
-
-myclass:
-   !new =:
-
-   !next =:
-
-   !index = ... :
-
-   !add = other :
-   !sub = other :
-   !mul = other :
-   !div = other :
-   !pow = other :
-   !mod = other :
-   !neg =:
-
-   !eq = other :
-   !ne = other :
-   !lt = other :
-   !gt = other :
-   !le = other :
-   !ge = other :
-
-   !and = other :
-   !or = other :
-   !not =:
