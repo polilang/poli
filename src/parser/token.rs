@@ -27,9 +27,17 @@ pub enum TokenType {
     Semicolon,
 
     If,
+    Then,
     Else,
+    Elif,
+
+    While,
+    Do,
+    Continue,
+    Break,
 
     Boolean,
+    Null,
     Operator,
 }
 
@@ -37,7 +45,7 @@ pub enum TokenType {
 pub enum Operator {
     Mul,
     Div,
-    
+
     Plus,
     Minus,
 
@@ -49,7 +57,7 @@ pub enum Operator {
     Lt,
     LtEqual,
     Gt,
-    GtEqual,    
+    GtEqual,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -57,7 +65,7 @@ pub struct Token {
     token_type: TokenType,
     row:        u32,
     col:        u32,
-    content:    String,    
+    content:    String,
 }
 
 impl Token {

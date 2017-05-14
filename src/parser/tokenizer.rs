@@ -116,7 +116,7 @@ impl<'a> Tokenizer {
     pub fn next_token(&mut self) -> bool {
         if self.top < self.tokens.len() {
             self.top += 1;
-            
+
             return true
         }
 
@@ -126,7 +126,7 @@ impl<'a> Tokenizer {
     pub fn prev_token(&mut self) -> bool {
         if self.top < self.tokens.len() {
             self.top -= 1;
-            
+
             return true
         }
 
@@ -181,7 +181,7 @@ impl<'a> Tokenizer {
 
                     self.pos   += 1;
                     self.start += 1;
-                    
+
                     while self.look(line) != del {
                         self.pos += 1
                     }
@@ -240,7 +240,7 @@ impl<'a> Tokenizer {
                 if c == '-' && self.look(line) == '>' {
                     self.pos += 2;
                     self.push(TokenType::Arrow, line);
-                    
+
                     continue
                 }
 
@@ -335,10 +335,17 @@ fn identifier(c: char) -> bool {
 fn keyword(v: &str) -> Option<TokenType> {
     match v {
         "true" |
-        "false"  => Some(TokenType::Boolean),
-        "else"   => Some(TokenType::Else),
-        "if"     => Some(TokenType::If),
-        "return" => Some(TokenType::Return),
+        "false"   => Some(TokenType::Boolean),
+        "null"    => Some(TokenType::Null)
+        "if"      => Some(TokenType::If),
+        "then"    => Some(TokenType::Then),
+        "else"    => Some(TokenType::Else),
+        "elif"    => Some(TokenType::Elif),
+        "while"   => Some(TokenType::While),
+        "do"      => Some(TokenType::Do),
+        "continue"=> Some(TokenType::Continue),
+        "break"   => Some(TokenType::Break),
+        "return"  => Some(TokenType::Return),
         _ => None,
     }
 }
