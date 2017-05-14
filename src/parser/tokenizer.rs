@@ -336,7 +336,7 @@ fn keyword(v: &str) -> Option<TokenType> {
     match v {
         "true" |
         "false"   => Some(TokenType::Boolean),
-        "null"    => Some(TokenType::Null)
+        "null"    => Some(TokenType::Null),
         "if"      => Some(TokenType::If),
         "then"    => Some(TokenType::Then),
         "else"    => Some(TokenType::Else),
