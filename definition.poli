@@ -5,7 +5,7 @@ bool     :"true"|"false"
 null     :"null"
 newline  :"\n"
 
-type     :"int"|"str"|"table"|"bool"|"null"|"object"
+type     :"i08"|"i16"|"i32"|"obj"|"bool"|"str"|"table"
 atom     :ident|number|string|bool|func-call|table
 
 op-unary :"not"|"-"
@@ -24,7 +24,7 @@ if       :"if" expr "then" statement ("else" statement)?
          ("elif" expr newline chunk)*
          ("else" newline chunk)?
 
-while    :"while (" expr ")" statement
+while    :"while" expr "do" statement
          |"while" expr newline chunk
 
 break    :"break"
