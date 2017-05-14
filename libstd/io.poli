@@ -2,15 +2,26 @@ with class from std.class
 with stdio from external.C
 
 
-fileWrapper =
-   index! = class
-
-   init = [self, pointer, str name, str mode]
-      self.pointer = pointer
-      self.name = name
-      self.mode = mode
-
 file =
-   open: [str name, str mode]
-      c_fprt = fopen(name, mode)
-      return fileWrapper(c_fptr, name, mode)
+   index!: class
+
+   init: [self, str name, str mode]
+      raw .c_fprt = cast("FILE*", stdio.fopen(cast("char*", name), cast("char*", mode))
+      .name = name
+      .mode = mode
+
+   close: [self]
+      if not stdio.fclose(cast("FILE*", .c_fptr))
+         error("Failed to close file")
+
+   read: [self, i32 bytes ->str]
+      if {"r", "r+", "w+", "a+"}.contains(.mode)
+         raw rbuffer = allocate(bytes + 1)
+
+         stdio.fgets(rbuffer, bytes, cast("FILE*", .c_fptr))
+         str buffer = cast("str", rbuffer)
+
+         free(rbuffer)
+
+         return buffer
+

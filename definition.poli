@@ -19,7 +19,7 @@ expr     :opunary? atom (operator expr)?
 
 assign   :type? ident "=" expr
 
-if       :"if (" expr ")" statement ("else" statement)?
+if       :"if" expr "then" statement ("else" statement)?
          |"if" expr newline chunk
          ("elif" expr newline chunk)*
          ("else" newline chunk)?

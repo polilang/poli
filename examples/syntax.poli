@@ -6,6 +6,26 @@ str bar = "asd"
 ~ dynamic inferred
 bar = 100
 
+~ flow control
+~ one line if
+if thing then print(thing) else print('no thing')
+
+~ multiline if
+if thing
+   print(thing)
+elif thing > 2
+   print("thing is bigger than 2")
+else
+   print("no thing")
+
+~ while
+while a<10
+   a++
+
+~ for loop from stdlib
+for range(10), [i]
+   if (i%2) print("odd") else continue
+
 ~ functions/lambdas
 ~ static
 foo = [int a, int b, int c  ->int]

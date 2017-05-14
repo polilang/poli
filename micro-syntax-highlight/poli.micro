@@ -1,21 +1,16 @@
 # Poli syntax highlighting for Micro.
+# Date: 14-05-2017
 # ~/.config/micro/syntax/poli.micro
-# Date: 17-03-24
 
 
 syntax "poli" ".*\.poli"
 
 
-# Statements
-
 # External files
 color preproc "\b((with|from)|%q|%!|%Q|%r|%x)\b"
 
 # Flow control
-color statement "\b(do|while|if|elif|else|for|in|return|continue|break)\b"
-
-# method define
-color identifier "\=(.*?)\:"
+color statement "\b(while|if|then|elif|else|return|continue|break)\b"
 
 # members
 color identifier "(\w*?\.\w+)"
@@ -27,24 +22,33 @@ color constant.bool "\b(false|null|true)\b"
 color constant.number "\b([0-9]+)\b"
 
 # method calls
-color constant "(\w+?\()"
+color special "(\w|\.)+?\("
 
-#parens
-color comment "(\(|\)|\[|\]|\{|\})"
+# Table keys
+color identifier "\b(\S+?)\b\:"
+
+# method define
+color identifier.function "(\w+!?)(\s*[:=]\s*)(\w*)(\s*\[)"
+
+# "self" parameter for classes
+color constant "\b(self)\b"
+
+# parentheses, brackets, braces
+color comment "[(){}\[\]]"
+
 # Symbols
 color symbol "(\*|/|%|\+|-|\^|>|<|=|!|,)"
 color symbol "(->|\.\.\.|\:)"
 # Logic
 color symbol "\b(not|and|or)\b"
 
-# Classes
-color identifier.class "(^)\b(\S+?)\b\:"
+# Metamethods
+color constant "\b(call|index)\b(\!)" #special
+color constant "\b(eq|ne|lt|gt|le|ge)\b(\!)" #comparison
+color constant "\b(add|sub|mul|div|mod|pow|neg)\b(\!)" #math
 
-# Class Specials
-color special "(\!)\b(new|next|index)\b" #special
-color special "(\!)\b(eq|ne|lt|gt|le|ge)\b" #comparison
-color special "(\!)\b(add|sub|mul|div|mod|pow|neg)\b" #math
-color special "(\!)\b(and|or|not)\b" #boolean
+color type "\b(i08|i16|i32|obj|bool|str|table)\b"
+color preproc "\b(raw|allocate|free|cast)\b"
 
 # Strings
 color constant.string "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"

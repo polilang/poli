@@ -5,7 +5,8 @@ for = [iter, body] ~ generic "for" iterator function
    while true
       ... = iter.next()
       if (not ...) break
-      body(...)
+      val = body(...)
+      if (val) return val
 
 
 
@@ -38,15 +39,14 @@ for range(10), []
 
 
 
-switch =
-   index!: class
-
-   init: [self, value => int]   .value = value
-   next: [self] [other => bool] .value == other
-   return {case}    ~ return an iterable so it can be used with 'for'
+switch = [value, callback]
+   callback([values]
+      val = for values, [item]
+         if (item==value) return true
+   )
 
 ~~~
-for switch(var), [case]
+switch var, [case]
    if case 1
       stdout.write "case 1"
       break
