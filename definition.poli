@@ -57,7 +57,6 @@ statement:assign
          |while
          |break
          |continue
-         |func-def
          |func-call
          |return
 
