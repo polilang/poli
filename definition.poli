@@ -48,6 +48,8 @@ table    :table-itm ((","|newline) table-itm)+
 table-itm:expr
          |ident ":" newline? expr
 
+table-idx:ident "." (expr|table-idx)
+
 return   :"return" expr?
 
 statement:assign
