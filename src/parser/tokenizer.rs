@@ -94,7 +94,7 @@ impl<'a> Tokenizer {
     fn is_operator(&mut self, line: &str) -> bool {
         let mut is_op = false;
 
-        let mut offset = 2; // dirty: longest operator length
+        let mut offset = 3; // dirty: longest operator length
         while self.pos + offset >= line.len() {
             offset -= 1
         }
@@ -194,6 +194,13 @@ impl<'a> Tokenizer {
                     continue
                 }
 
+                if self.is_operator(line) {
+                    self.pos += 1;
+                    self.push(TokenType::Operator, line);
+
+                    continue
+                }
+
                 if identifier(self.look(line)) {
                     while identifier(self.look(line)) || self.look(line).is_digit(10) {
                         self.pos += 1
@@ -240,13 +247,6 @@ impl<'a> Tokenizer {
                 if c == '-' && self.look(line) == '>' {
                     self.pos += 2;
                     self.push(TokenType::Arrow, line);
-
-                    continue
-                }
-
-                if self.is_operator(line) {
-                    self.pos += 1;
-                    self.push(TokenType::Operator, line);
 
                     continue
                 }

@@ -19,7 +19,7 @@ pub enum Expression {
             Operator,
             Box<Expression>,
         ),
-    
+
     Call(
             Box<Expression>,
             Box<Vec<Expression>>,
@@ -32,7 +32,7 @@ pub enum Statement {
             String,
             Box<Expression>,
         ),
-    
+
     Block(
             Box<Vec<Statement>>,
         ),
@@ -80,13 +80,13 @@ impl Parser {
             stack.push(
                     try!(self.statement()),
                 );
-            
+
             self.tokenizer.next_token();
         }
 
         Ok(stack)
     }
-    
+
     fn operation(
         &mut self,
         expression: Expression
@@ -106,14 +106,14 @@ impl Parser {
         ex_stack.push(
                 try!(self.term())
             );
-        
+
         let mut done = false;
         while ex_stack.len() > 1 {
-            
+
             if !done && self.tokenizer.next_token() {
                 if self.tokenizer.current().get_type() != TokenType::Operator {
                     self.tokenizer.prev_token();
-                    
+
                     done = true;
 
                     continue
@@ -122,7 +122,7 @@ impl Parser {
                 let (op, prec) = super::tokenizer::operator(
                         &self.tokenizer.current_content()
                     ).unwrap();
-                
+
                 if prec > op_stack.last().unwrap().1 {
                     let left  = ex_stack.pop().unwrap();
                     let right = ex_stack.pop().unwrap();
@@ -142,7 +142,7 @@ impl Parser {
 
                     continue
                 }
-                
+
                 self.tokenizer.next_token();
 
                 ex_stack.push(try!(self.term()));
@@ -171,14 +171,14 @@ impl Parser {
 
         self.tokenizer.next_token();
 
-        while self.tokenizer.current().get_type() != TokenType::RParen {            
+        while self.tokenizer.current().get_type() != TokenType::RParen {
             stack.push(
                     try!(self.expression())
                 );
 
             self.tokenizer.next_token();
-            
-            if self.tokenizer.current().get_type() == TokenType::Comma {                
+
+            if self.tokenizer.current().get_type() == TokenType::Comma {
                 self.tokenizer.next_token();
             }
         }
@@ -193,7 +193,7 @@ impl Parser {
 
     fn term(&mut self) -> Result<Expression, String> {
         let token_type = self.tokenizer.current().get_type();
-        
+
         match token_type {
             TokenType::Integer => Ok(
                     Expression::Integer(
@@ -218,12 +218,12 @@ impl Parser {
                             self.tokenizer.current_content(),
                         )
                 ),
-            
+
             TokenType::Ident => {
                     let ident = Expression::Ident(
                             self.tokenizer.current_content(),
                         );
-                    
+
                     if self.tokenizer.next_token() {
                         return match self.tokenizer.current().get_type() {
                             TokenType::Operator  => self.operation(ident),
@@ -266,7 +266,7 @@ impl Parser {
 
                     Ok(Expression::Return(Box::new(expression)))
                 },
-            
+
             _ => Err(
                     format!("unexpected term: {:#?}", token_type)
                 ),
@@ -279,7 +279,7 @@ impl Parser {
                     let mut p = Parser::from(
                             Tokenizer::from(v)
                         );
-                    
+
                     p.parse()
                 },
             _ => Err(
@@ -329,7 +329,7 @@ impl Parser {
 
                     self.tokenizer.next_token();
 
-                    let body = try!(self.block());  
+                    let body = try!(self.block());
 
                     self.tokenizer.next_token();
 
