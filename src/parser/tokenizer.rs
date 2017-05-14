@@ -381,6 +381,8 @@ pub fn operator(v: &str) -> Option<(Operator, u8)> {
         ">"  => Some((Operator::Gt,      4)),
         "<=" => Some((Operator::LtEqual, 4)),
         ">=" => Some((Operator::GtEqual, 4)),
+        "and"=> Some((Operator::And,     5)),
+        "or" => Some((Operator::Or,      5)),
         _    => None,
     }
 }

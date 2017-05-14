@@ -58,6 +58,9 @@ pub enum Operator {
     LtEqual,
     Gt,
     GtEqual,
+
+    And,
+    Or,
 }
 
 #[derive(Debug, Clone, PartialEq)]
