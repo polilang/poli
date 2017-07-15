@@ -1,95 +1,125 @@
 ~ assignment
+
 ~ static
-int bar = 10
+i32 bar = 10
 str bar = "asd"
+
 
 ~ dynamic inferred
 bar = 100
 
+
+
 ~ flow control
 ~ one line if
-if thing then print(thing) else print('no thing')
+if thing do print(thing) else print('no thing')
+
 
 ~ multiline if
 if thing
    print(thing)
-elif thing > 2
+
+else if thing > 2
    print("thing is bigger than 2")
+
 else
    print("no thing")
 
-~ while
-while a<10
-   a++
 
-~ for loop from stdlib
-for range(10), [i]
-   if (i%2) print("odd") else continue
+~ while
+while a < 10 do a++
+
+while a < 100
+
+   if a % 2
+      print("{} is odd", a)
+
+   else
+      print("{} is even", a)
+
+
+
+~ templates
+template {for <word:item> in <word:iterable> <chunk:body>}
+   do
+      <temp:iterator> = <iterable>.istart()
+      while not <iterator>.iend()
+         <item> = <iterator>.inext()
+         <body>
+
+
+~ for loop source
+for item in range(10)
+   print(item)
+
+
+~ for loop compiled with template rules
+do
+   __iterator_mangled__ = range(10).istart()
+   while not __iterator_mangled__.iend()
+      item = __iterator_mangled__.inext()
+      print(item)
+
+for i in range(10)
+   if i % 2 do print("odd") else continue
+
+
 
 ~ functions/lambdas
 ~ static
-foo = [int a, int b, int c  ->int]
+foo {i32 a, i32 b, i32 c} -> i32
    return frobnicate(a, b+c)
 
+
 ~ implicit return
-frobnicate = [int a, int b ->int] a * b
+frobnicate {i32 a, i32 b} -> i32 a * b
+
 
 ~ dynamic
-foo = [a, b, int c] frobnicate(c+b, a)
-foo = [a, b, c] a + b + c
+foo {a, b, i32 c}
+   return frobnicate(c+b, a)
 
-~ inline lambda definition and call
-print( ([a,b ->int] a+b)(1, 2) )
-
-
-~ tables/classes
-~ empty
-table tab = {}
-
-~ table with items
-tab = {1, "asd", foo}
-
-~ keyed table
-tab = {
-   foo: 10
-   bar: 20
-}
-
-~ mixed table
-tab = {
-   1, 2, 3
-   foo: 12
-   33, bar: 10
-}
-
-~ table without braces
-tab =
-   asd: 123
-   boo: 321
-
-~ classes
-class =
-   call!: [self, ...]
-      instance = {index!: self}
-      if (instance.init) instance.init(...)
-      return instance
-
-~ table with metamembers
-bar =
-   index!: class
-
-   init: [self, a, b]
-      .a = a
-      .b = b
-
-   frobnicate: [self] .a + .b
-
-~ "subclassing"
-subaru =
-   index!: bar ~ looks up in `bar` if a method isn't found
-
-   init: [self, a, b, c]
-      bar.init(self, a, b)
-      .c = c
+foo {a, b, c}
+   return a + b + c
 
 
+
+~ structs / classes
+Point:
+
+   i32 x, y
+
+   init {i32 x, i32 y}
+
+      .x = x
+      .y = y
+
+
+range:
+
+   i32 start, end, step, curr
+
+
+   init {i32 a, i32*? b, i32*? step}
+
+      .start = null!= b    and a or 0
+      .end   = null!= b    or  a
+      .step  = null!= step and step or (.end<0 and -1 or 1)
+      .curr  = null
+
+
+   istart{self} self
+
+
+   iend  {self} -> i32 .curr == .end
+
+
+   inext {self} -> i32
+
+      if not .curr
+         .curr = .start
+
+      elif (.step>0 and .curr<=.end) or (.step<0 and .curr>=.end)
+         .curr += .step
+
+      return .curr
