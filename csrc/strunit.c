@@ -54,15 +54,15 @@ void compare()
 }
 
 
-void ncompare()
+void comparen()
 {
    test
    (
-      strf.compare("asdf", "asdf", 3) == 0
-   && strf.compare("ASDF", "asdf", 3)  < 0
-   && strf.compare("asdf", "ASDF", 3)  > 0
+      strf.comparen("asdf", "asdf", 3) == 0
+   && strf.comparen("ASDF", "asdf", 3)  < 0
+   && strf.comparen("asdf", "ASDF", 3)  > 0
 
-      ,"ncompare"
+      ,"comparen"
    );
 }
 
@@ -117,6 +117,17 @@ void upper()
    && strf.equal(strf.upper(strf.new("hello")), strf.new("HELLO"))
 
       ,"upper"
+   );
+}
+
+
+void from_fmt()
+{
+   test
+   (
+      strf.equal(strf.from_fmt("%s", "hello"), "hello")
+
+      ,"from_fmt"
    );
 }
 
@@ -251,6 +262,17 @@ void pfindc()
 }
 
 
+void occurs()
+{
+   test
+   (
+      strf.occurs("hello world", "l") == 3
+
+      ,"occurs"
+   );
+}
+
+
 void concat()
 {
    str a = strf.new("hello ");
@@ -268,24 +290,24 @@ void concat()
 }
 
 
-void ltrim()
+void triml()
 {
    test
    (
-      strf.equal(strf.ltrim(strf.new("   hello   ")), "hello   ")
+      strf.equal(strf.triml(strf.new("   hello   ")), "hello   ")
 
-      ,"ltrim"
+      ,"triml"
    );
 }
 
 
-void rtrim()
+void trimr()
 {
    test
    (
-      strf.equal(strf.rtrim(strf.new("   hello   ")), "   hello")
+      strf.equal(strf.trimr(strf.new("   hello   ")), "   hello")
 
-      ,"rtrim"
+      ,"trimr"
    );
 }
 
@@ -323,19 +345,57 @@ void slice()
    );
 }
 
-
-void split()
+void slicep()
 {
-   str* strings = strf.split("hello world", " ");
+   str s = "hello world";
 
    test
    (
-      strf.equal(strings[0], "hello")
-   && strf.equal(strings[1], "world")
+      strf.equal(strf.slicep(s, s, s+5), "hello")
+   && strf.equal(strf.slicep(s, s+6, s+11), "world")
+
+      ,"slicep"
+   );
+}
+
+
+
+void split()
+{
+   str* string1 = strf.split("hello world", " ");
+   str* string2 = strf.split("hello\n""world", "\n");
+   str* string3 = strf.split("0", "0");
+
+   test
+   (
+      strf.equal(string1[0], "hello")
+   && strf.equal(string1[1], "world")
+   && strf.equal(string2[0], "hello")
+   && strf.equal(string2[1], "world")
+   && strf.equal(string3[0], "")
+   && strf.equal(string3[1], "")
 
       ,"split"
    );
 }
+
+
+void splitl()
+{
+   str a = "hello world", b = "0";
+   str lasta = a, lastb = b;
+
+   test
+   (
+      strf.equal(strf.splitl(a, " ", &lasta), "hello")
+   && strf.equal(strf.splitl(a, " ", &lasta), "world")
+   && strf.equal(strf.splitl(b, "0", &lastb), "")
+   && strf.equal(strf.splitl(b, "0", &lastb), "")
+
+      ,"splitl"
+   );
+}
+
 
 
 int main ()
@@ -343,7 +403,7 @@ int main ()
    atexit(gm_purge); // purge garbage on exit
 
    equal();
-   ncompare();
+   comparen();
    compare();
    length();
 
@@ -352,6 +412,8 @@ int main ()
 
    lower();
    upper();
+
+   from_fmt();
 
    from_i64();
    from_u64();
@@ -365,15 +427,19 @@ int main ()
    pfind();
    findc();
    pfindc();
+   occurs();
 
    concat();
 
-   ltrim();
-   rtrim();
+   triml();
+   trimr();
    trim();
 
    format();
 
    slice();
+   slicep();
+
    split();
+   splitl();
 }

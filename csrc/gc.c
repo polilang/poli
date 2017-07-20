@@ -1,3 +1,7 @@
+#ifndef POLI_GM
+#define POLI_GM
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "types.c"
@@ -206,6 +210,8 @@ void* gm_export (void* var) // export a variable from inner GM scope to outer
 
          return var;
       }
+
+   return NULL;
 }
 
 
@@ -228,3 +234,5 @@ gm_pop();}
 #define __new_1(type)       alloc(sizeof(type))
 #define __new_2(type, size) alloc(sizeof(type)*size)
 */
+
+#endif
