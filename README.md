@@ -1,21 +1,6 @@
-# poli
-the poli language compiler
+![](logo.png)
 
-```
-$./poli --help
 
-the poli language
 
-usage:
-    poli build <source> <destination>
-    poli run <source>
-    poli trees <source>
-    poli repl
-    poli (-h | --help)
-    poli --version
+# Compiler in development: please stand by!
 
-options:
-    -h --help   show this message
-    --version   show compiler version
-    --optimize  optimize compiled LLVM IR
-```
