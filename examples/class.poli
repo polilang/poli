@@ -1,5 +1,0 @@
-class =
-   call!: [self, ...]
-      instance = {index!: self}
-      if (instance.init) instance.init(...)
-      return instance

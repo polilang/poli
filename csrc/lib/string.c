@@ -21,16 +21,53 @@
 
 
 
-static u32
+i32
+chr_isalpha (i08 c)
+{
+   return ((c >= 'a') && (c <= 'z'))
+       || ((c >= 'A') && (c <= 'Z'))
+       || (c == '_');
+}
+
+
+i32
+chr_isdigit (i08 c)
+{
+   return (c >= '0')
+       && (c <= '9');
+}
+
+
+i32
+chr_isalnum (i08 c)
+{
+   return chr_isdigit(c)
+       || chr_isalpha(c);
+}
+
+
+i32
+chr_iswhite (i08 c)
+{
+   return c == ' '
+       || c == '\t'
+       || c == '\r'
+       || c == '\n';
+}
+
+
+
+u32
 str_length (str s)
 {
    u32 len = 0;
-   while (s[len] != 0) len++;
+   if (s)
+      while (s[len] != 0) len++;
    return len;
 }
 
 
-static str
+str
 str_new (str s) //str constructor
 {
    str mem = alloct(str_length(s) + 1, "str");
@@ -39,7 +76,7 @@ str_new (str s) //str constructor
 }
 
 
-static str
+str
 str_lower (str s)
 {
    str ret = alloc(str_length(s) + 1);
@@ -56,7 +93,7 @@ str_lower (str s)
 }
 
 
-static str
+str
 str_upper (str s)
 {
    str ret = alloc(str_length(s) + 1);
@@ -73,7 +110,7 @@ str_upper (str s)
 }
 
 
-static i32
+i32
 str_equal (str a, str b)
 {
    if (str_length(a) == str_length(b))
@@ -89,31 +126,29 @@ str_equal (str a, str b)
 }
 
 
-static i32
+i32
 str_comparen (str a, str b, i32 len)
 {
    while (*a == *b && --len)
    {
-      if (*a == '\0')
-         return *a - *b;
-
-      a++; b++;
+      a++;
+      b++;
    }
 
    return *a - *b;
 }
 
 
-static i32
+i32
 str_compare (str a, str b)
 {
-   return str_comparen(a, b, str_length(b));
+   return str_comparen(a, b, str_length(b)+1);
 }
 
 
 // find first occurrence of a string in string
 // return index
-static i64
+i64
 str_find (str in, str what)
 {
    if (*in && *what)
@@ -134,7 +169,7 @@ str_find (str in, str what)
 
 // find first occurrence of a string in string
 // return pointer
-static str
+str
 str_pfind (str in, str what)
 {
    i64 index = str_find(in, what);
@@ -148,7 +183,7 @@ str_pfind (str in, str what)
 
 // find first occurrence of characters in string
 // return index
-static i64
+i64
 str_findc (str in, str what)
 {
    if (*in && *what)
@@ -169,7 +204,7 @@ str_findc (str in, str what)
 
 // find first occurrence of characters in string
 // return pointer
-static str
+str
 str_pfindc (str in, str what)
 {
    i64 index = str_findc(in, what);
@@ -181,8 +216,28 @@ str_pfindc (str in, str what)
 }
 
 
+str
+str_plast (str in, str what)
+{
+   str last = in, found = NULL;
+
+   while ((found = str_pfind(last, what)))
+      last = found+1;
+
+   return last != in ? last-1 : NULL;
+}
+
+
+i64
+str_last (str in, str what)
+{
+   str found = str_plast(in, what);
+   return found ? found - in : -1;
+}
+
+
 // count occurrences of a substring
-static u32
+u32
 str_occurs (str in, str what)
 {
    u32 i = 0; in--;
@@ -190,7 +245,8 @@ str_occurs (str in, str what)
    return i;
 }
 
-static str
+
+str
 str_from_fmt (str fmt, ...)
 {
    va_list arg; va_start(arg, fmt);
@@ -204,8 +260,8 @@ str_from_fmt (str fmt, ...)
 }
 
 
-static str
-str_from_i64 (i64 v)
+str
+str_from_i (i64 v)
 {
    i08 buf[30];
    sprintf(buf, "%li", v);
@@ -214,8 +270,8 @@ str_from_i64 (i64 v)
 }
 
 
-static str
-str_from_u64 (u64 v)
+str
+str_from_u (u64 v)
 {
    i08 buf[30];
    sprintf(buf, "%lu", v);
@@ -224,8 +280,8 @@ str_from_u64 (u64 v)
 }
 
 
-static str
-str_from_f64 (f64 v)
+str
+str_from_f (f64 v)
 {
    i08 buf[128];
    sprintf(buf, "%lf", v);
@@ -235,12 +291,11 @@ str_from_f64 (f64 v)
       buf[i]=0;
 
    return str_new(buf);
-//   return strcpy(alloc(str_length(buf)+1), buf);
 }
 
 
-static i64
-str_to_i64 (str s)
+i64
+str_to_i (str s)
 {
    i64 final = 0, sign = 1, mult = 1;
 
@@ -254,8 +309,6 @@ str_to_i64 (str s)
 
    for (i64 ch = nlen-1; ch >= 0 ; ch--) // read the number
    {
-//      final += (i64)(s[ch] - '0') * fpow10(nlen-ch-1); // digit * 10^pos_in_str
-
       final += (i64)(s[ch] - '0') * (i64)mult; // digit * 10^pos_in_str
       mult *= 10;
    }
@@ -264,15 +317,15 @@ str_to_i64 (str s)
 }
 
 
-static u64
-str_to_u64 (str s)
+u64
+str_to_u (str s)
 {
-   return str_to_i64(s);
+   return str_to_i(s);
 }
 
 
-static f64
-str_to_f64 (str s)
+f64
+str_to_f (str s)
 {
    f64 sign = 1.0;
 
@@ -306,7 +359,7 @@ str_to_f64 (str s)
 }
 
 
-static str
+str
 str_concat (str a, str b)
 {
    i64 len = str_length(a) + str_length(b),
@@ -324,41 +377,41 @@ str_concat (str a, str b)
 }
 
 
-static i08
-str_iswhitec (str c)
+str
+str_extend (str a, str b)
 {
-   switch (*c)
-   {
-      case '\t':
-      case '\r':
-      case '\n':
-      case ' ' :
-         return 1;
+   i64 len = str_length(a) + str_length(b),
+       off = str_length(a);
 
-      default:
-         return 0;
-   }
+   if (len < 0) return NULL; // strings are too long / overflow
+
+   a = gm_realloc(a, len + 1);
+
+   while (*b) *(a + off++) = *b++;
+   *(a + off) = 0;
+
+   return a;
 }
 
 
-static str
-str_ltrim (str s) // trim whitespace from left side
+str
+str_triml (str s) // trim whitespace from left side
 {
    // trim forward
-   while (str_iswhitec(s)) s++;
+   while (chr_iswhite(*s)) s++;
    return str_new(s);
 }
 
 
-static str
-str_rtrim (str s) // trim whitespace from right side
+str
+str_trimr (str s) // trim whitespace from right side
 {
    str result;
 
    str fwd = str_new(s); // copy
 
    str bwd = fwd + str_length(fwd) -1; // point to end and trim "backward"
-   while (str_iswhitec(bwd)) *bwd-- = 0;
+   while (chr_iswhite(*bwd)) *bwd-- = 0;
 
    result = str_new(fwd);
 
@@ -368,16 +421,16 @@ str_rtrim (str s) // trim whitespace from right side
 }
 
 
-static str
+str
 str_trim (str s) // trim whitespace from both sides
 {
    str result;
 
    str fwd = str_new(s); // copy
-   while (str_iswhitec(fwd)) fwd++;
+   while (chr_iswhite(*fwd)) fwd++;
 
    str bwd = fwd + str_length(fwd) -1; // point to end and trim "backward"
-   while (str_iswhitec(bwd)) *bwd-- = 0;
+   while (chr_iswhite(*bwd)) *bwd-- = 0;
 
    result = str_new(fwd); // quick copy
 
@@ -387,7 +440,7 @@ str_trim (str s) // trim whitespace from both sides
 }
 
 
-static str
+str
 str_format (str s, ...)
 {
    va_list args; va_start(args, s);
@@ -404,10 +457,16 @@ str_format (str s, ...)
 }
 
 
-static str
-str_slice (str s, u32 from, u32 to)
+str
+str_slice (str s, i64 from, i64 to)
 {
+   if (from < 0)              from = str_length(s) + from;
+   if (from > str_length(s))  from = str_length(s);
+
+   if (to < 0)             to = str_length(s) + to;
    if (to > str_length(s)) to = str_length(s);
+
+   if (from > to) return "";
 
    str ret = alloct(to - from + 1, "str");
 
@@ -419,34 +478,36 @@ str_slice (str s, u32 from, u32 to)
    return ret;
 }
 
-static str
-str_slicep (str s, str from, str to)
+str
+str_slicep (str from, str to)
 {
-   if (!to || to > s + str_length(s))
-      to = s + str_length(s);
+   str ret = NULL;
 
-   str ret = alloct(to - from + 1, "str");
+   if (!to) to = from + str_length(from);
 
-   for (str i = from; i < to; i++)
-      ret[i-from] = *i;
+   if (from)
+   {
+      ret = alloct(to - from + 1, "str");
 
-   ret[to-from] = 0;
+      for (str i = from; i < to; i++)
+         ret[i - from] = *i;
+
+      ret[to - from] = 0;
+   }
 
    return ret;
 }
 
 
-static str
-str_split_lazy (str s, str delim, str* last)
+str
+str_splitl (str* last, str delim)
 {
    str ret = NULL;
 
    if (*last)
    {
       str next = str_pfind(*last, delim);
-
-      ret = str_slicep(s, *last, next);
-
+      ret = str_slicep(*last, next);
       *last = next ? next + str_length(delim) : NULL;
    }
 
@@ -454,94 +515,17 @@ str_split_lazy (str s, str delim, str* last)
 }
 
 
-static str*
+str*
 str_split (str s, str delim)
 {
-   str* strings = NULL;
-   str last = s;
-   u32 i = 0, o = str_occurs(s, delim)+1;
+   u32 i = 0, o = str_occurs(s, delim) + 1;
+   str *strings = alloc(sizeof(str) * (o+1)), last = s;
 
-   strings = alloc(sizeof(str) * (o+1));
-
-   while ((strings[i] = str_split_lazy(s, delim, &last))) i++;
+   while ((strings[i] = str_splitl(&last, delim))) i++;
 
    return strings;
 }
 
-
-
-struct
-{
-   str   (*new)      ();
-   u32   (*length)   ();
-   str   (*lower)    ();
-   str   (*upper)    ();
-   str   (*from_fmt) (str, ...);
-   str   (*from_i)   ();
-   str   (*from_u)   ();
-   str   (*from_f)   ();
-   i64   (*to_i)     ();
-   u64   (*to_u)     ();
-   f64   (*to_f)     ();
-   i32   (*equal)    ();
-   i32   (*compare)  ();
-   i32   (*comparen) ();
-   i08   (*iswhitec) ();
-   i64   (*find)     ();
-   str   (*pfind)    ();
-   i64   (*findc)    ();
-   str   (*pfindc)   ();
-   u32   (*occurs)   ();
-   str   (*trim)     ();
-   str   (*triml)    ();
-   str   (*trimr)    ();
-   str   (*concat)   ();
-   str   (*format)   (str, ...);
-   str   (*slice)    ();
-   str   (*slicep)   ();
-   str*  (*split)    ();
-   str   (*splitl)   ();
-}
-strf =
-{
-   str_new,
-
-   str_length,
-
-   str_lower,
-   str_upper,
-
-   str_from_fmt,
-   str_from_i64,
-   str_from_u64,
-   str_from_f64,
-   str_to_i64,
-   str_to_u64,
-   str_to_f64,
-
-   str_equal,
-   str_compare,
-   str_comparen,
-   str_iswhitec,
-
-   str_find,
-   str_pfind,
-   str_findc,
-   str_pfindc,
-   str_occurs,
-
-   str_trim,
-   str_ltrim,
-   str_rtrim,
-
-   str_concat,
-   str_format,
-
-   str_slice,
-   str_slicep,
-   str_split,
-   str_split_lazy,
-};
 
 
 #endif

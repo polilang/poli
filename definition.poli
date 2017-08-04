@@ -5,7 +5,7 @@ bool     :"true"|"false"
 null     :"null"
 newline  :"\n"
 
-type     :"i08"|"i16"|"i32"|"obj"|"bool"|"str"|"table"
+type     :"i08"|"i16"|"i32"|"i64"|"u08"|"u16"|"u32"|"u64"|"f32"|"f64"|"str"
 atom     :ident|number|string|bool|func-call|table
 
 op-unary :"not"|"-"

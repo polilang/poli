@@ -1,6 +1,0 @@
-while a<5
-   stdout.write(a++)
-
-while true
-   b = b or b+1
-   if (b>10) break

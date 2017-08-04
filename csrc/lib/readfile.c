@@ -4,13 +4,16 @@
    quick readfile
 */
 
+#ifndef POLI_READFILE
+#define POLI_READFILE
 
 
 #include <stdio.h>   // fopen, fgets, fclose, FILE
 
 #include "gc.c"      // alloc, gm_realloc
 #include "types.c"   // datatypes
-#include "string.c"  // strf.new
+#include "string.c"  // str_new
+#include "strace.c"
 
 
 
@@ -23,10 +26,11 @@ str* readfile (str filename)
    i08 buf[256];
 
    FILE *f = fopen(filename, "r");
+   st_assert(f, "Couldn't open file '%s'", filename);
 
    while (fgets(buf, sizeof(buf), f))
    {
-      strings[last_line] = strf.new(buf);
+      strings[last_line] = str_new(buf);
       strings = gm_realloc(strings, sizeof(str)*((++last_line)+1));
       strings[last_line] = 0;
    }
@@ -35,3 +39,5 @@ str* readfile (str filename)
 
    return strings;
 }
+
+#endif
