@@ -34,7 +34,7 @@ struct token
 {
    enum token_type type;
    u32  line;
-   str  from, to;
+   str  from, to, lexeme;
 
    struct token *next;
 }
@@ -47,10 +47,11 @@ tk_new (enum token_type type, str from, str to, u32 line)
 {
    Token *tk = alloc(sizeof(Token));
 
-   tk->line = line;
-   tk->from = from;
-   tk->to   = to;
-   tk->type = type;
+   tk->line   = line;
+   tk->from   = from;
+   tk->to     = to;
+   tk->lexeme = str_slicep(from, to);
+   tk->type   = type;
 
    return tk;
 }
