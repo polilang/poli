@@ -160,13 +160,16 @@ tk_get (str *char_curr, u32 line, str *sdelims)
       if (chr_isdigit(**char_curr))
          tk = tk_number(char_curr, line);
 
-      else if (chr_isalpha(**char_curr))
+      else
+      if (chr_isalpha(**char_curr))
          tk = tk_word(char_curr, line);
 
-      else if ((sdelim_end = tk_strstart(char_curr, sdelims)) != -1)
+      else
+      if ((sdelim_end = tk_strstart(char_curr, sdelims)) != -1)
          tk = tk_string(char_curr, line, sdelims[sdelim_end]);
 
-      else if ((**char_curr == '\n'))
+      else
+      if ((**char_curr == '\n'))
          tk = tk_newline(char_curr, line);
 
       else
@@ -268,6 +271,13 @@ rm_comments (str *source, str comments)
 }
 
 
+u32
+line_end (str line)
+{
+   return !*line || (*line == '\n') || (*line == '\r' && line[1] == '\n');
+}
+
+
 Token *
 tokenize (str *source, str comments, str sdelim)
 {
@@ -275,31 +285,46 @@ tokenize (str *source, str comments, str sdelim)
          *tk_curr  = NULL,
          *tk_prev  = NULL;
 
-   u32 indent = 0;
+   u32 indents[256] = {0}, *curr_indent=indents+1;
+
    str* sdelims = str_split(sdelim, " "); // string start/end delimiter pairs
+
 
    rm_comments(source, comments);
 
+
    for (u32 line = 0; source[line]; line++)
    {
-      if (indent != get_indent(source[line]) && *(source[line]+get_indent(source[line])+1))
+      *curr_indent = get_indent(source[line]);
+
+      if (*curr_indent != curr_indent[-1] && !line_end(source[line] + *curr_indent))
       {
-         if (indent < get_indent(source[line]))
+         if (*curr_indent > curr_indent[-1])
+         {
             tk_curr = tk_indent(line);
+            curr_indent = curr_indent+1;
+            tk_prev = tk_link(tk_prev, tk_curr);
+         }
 
          else
-            tk_curr = tk_dedent(line);
+         {
+            while (curr_indent[-1] != get_indent(source[line]) && curr_indent != indents)
+            {
+               tk_curr = tk_dedent(line);
+               curr_indent = curr_indent-1;
+               tk_prev = tk_link(tk_prev, tk_curr);
+            }
+         }
 
-         tk_prev = tk_link(tk_prev, tk_curr);
-
-         indent = get_indent(source[line]);
+         *curr_indent = get_indent(source[line]);
       }
 
-      source[line] = source[line] + get_indent(source[line]);
+      source[line] = source[line] + *curr_indent;
 
       if((tk_curr = tokenize_line(source[line], line, sdelims)))
       {
          if (!tk_first) tk_first = tk_curr; // keep the token which starts the stream
+
          if (tk_prev) tk_prev->next = tk_curr; // link any previous tokens to new chunk
 
          while (tk_curr->next)
@@ -308,6 +333,7 @@ tokenize (str *source, str comments, str sdelim)
          tk_prev = tk_curr; // store the last token
       }
    }
+
 
    tk_curr->next = NULL;
 
