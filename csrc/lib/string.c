@@ -21,6 +21,44 @@
 
 
 
+i32 chr_isalpha   (i08);
+i32 chr_isdigit   (i08);
+i32 chr_isalnum   (i08);
+i32 chr_iswhite   (i08);
+u32 str_length    (str);
+str str_new       (str);
+str str_lower     (str);
+str str_upper     (str);
+i32 str_equal     (str, str);
+i32 str_comparen  (str, str, i32 len); // 0 on equal
+i32 str_compare   (str, str);          // 0 on equal
+i64 str_find      (str in, str what); // -1 on fail
+str str_pfind     (str in, str what); //  0 on fail
+i64 str_findc     (str in, str what); // -1 on fail
+str str_pfindc    (str in, str what); //  0 on fail
+str str_plast     (str in, str what); //  0 on fail
+i64 str_last      (str in, str what); // -1 on fail
+u32 str_occurs    (str in, str what);
+str str_from_fmt  (str fmt, ...);
+str str_from_i    (i64);
+str str_from_u    (u64);
+str str_from_f    (f64);
+i64 str_to_i      (str);
+u64 str_to_u      (str);
+f64 str_to_f      (str);
+str str_concat    (str, str);
+str str_extend    (str, str);
+str str_triml     (str);
+str str_trimr     (str);
+str str_trim      (str);
+str str_format    (str, ...);
+str str_slice     (str, i64 from, i64 to);
+str str_slicep    (str from, str to);
+str str_splitl    (str* last, str delim);
+str*str_split     (str, str delim);
+
+
+
 i32
 chr_isalpha (i08 c)
 {
