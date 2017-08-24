@@ -8,37 +8,38 @@
 # --- datatypes, expressions, assignment
 
 # static typing
-i32 var := 123 * (16 + 2)
+i32 someint = 123 * (16 + 2)
 
 # pointers/references
-i32 *ptr = var
-*ptr := 15 * var
+i32* ptr = :someint # i32 *ptr = &(someint);
+ptr := 15 * someint
 
 # dynamic typing
-dynamic := "string"
+var dynamic = "string"
 
 # dynamic pointers
-*dptr = dynamic
-*dptr := 12345
+var dptr := dynamic # var *dptr = &dynamic;
+:dptr = 12345
 
 # arrays
-i32 [5] arr := [1, 2, 3, 4, 5]
+i32 [5] arr := [1, 2, 3, 4, 5] # i32 arr[5] = {1, 2, 3, 4, 5};
 
 # automatic sizing
-i32 [] auto := [5, 4, 3, 2]
+i32 [] auto := [5, 4, 3, 2] # i32 auto[] = {5, 4, 3, 2};
 
 # pointers to arrays
-i32 *p_auto = auto
-*p_auto[0] := 6
+i32 p_auto := auto
+p_auto[0] = 6
+:p_auto = 6
 
 # dynamic arrays with automatic size
 [] dynauto := [2, 2.4, "what", auto]
 
 # casting
-i32 cast := i32 2.4564
+i32 cast := 2.4564 as i32
 
 # splitting a type into bytes by casting; union exploit
-u08[4] bsplit := u08[] u32 123452
+u08[4] bsplit := 123452 as u32 as i08[]
 
 
 # --- functions
@@ -55,8 +56,8 @@ countdown {i32 i}
 
 
 # functions taking pointers
-modify {u64 *thing}
-   *thing := 12345
+modify {u64* thing}
+   thing := 12345
 
 
 # typed function, returns i64
@@ -87,29 +88,29 @@ Vector2:
 
 
    # initializer with overloading
-   new! {self, i32 x, i32 y}
+   new {self, i32 x, i32 y}
       # "." is sugar for the first argument in the function
       .x := x
       .y := y
 
 
-   new! {self, Vector2 v}
+   new {self, Vector2 v}
       .x := v.x
       .y := v.y
 
 
    # operators with overloading
-   add! {self, Vector2 other}
+   add {self, Vector2 other}
       .x := .x + other.x
       .y := .y + other.y
 
 
-   add! {self, list other}
+   add {self, list other}
       .x := .x + other[0]
       .y := .y + other[1]
 
 
-   add! {self, i32 x, i32 y}
+   add {self, i32 x, i32 y}
       .x := .x + x
       .y := .y + y
 
@@ -122,10 +123,10 @@ Vector2 vec = Vector2(1, 2)
 # preprocessor templates
 template {for <word:type>? <word:item> in <expression:iterable> <newline> <block:body>}
    (
-      iterator = iterable
+      iterator := iterable
       type item
 
-      while item = iterator.next()
+      while item := iterator.next()
          body
    )
 

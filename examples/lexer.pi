@@ -1,0 +1,95 @@
+###
+   Poli language - 2017, MIT license
+
+   syntax lexer
+###
+
+
+
+with string
+
+
+
+i32 chr_escaped {str chr} (*(chr-2) != '\\') and (*(chr-1) == '\\')
+
+
+
+enum et_token
+   none
+   indent
+   dedent
+   newline
+   word
+   number
+   string
+   symbol
+
+
+
+Token:
+   et_token type
+   u32      line
+   str      from, to
+   Token*   next
+
+
+   Token new {et_type type, str from, str to, u32 line}
+      Token* tk = new [type, line, from, to, 0]
+      return tk
+
+   Token symbol {str* char_curr, u32 line} Token(symbol, *char_curr, *char_curr +1, line)
+
+   Token newline {str* char_curr, u32 line} Token(newline, *char_curr, *char_curr+1, line)
+
+   Token indent {u32 line} Token(indent, 0,0, line)
+
+   Token dedent {u32 line} Token(dedent, 0,0, line)
+
+   Token number {str* char_curr, u32 line}
+      str char_start = *char_curr
+
+      while (**char_curr).is_digit() : (*char_curr)++
+      (*char_curr)--
+
+      return Token(number, char_start, *char_curr + 1, line)
+
+   Token string {str* char_curr, u32 line, str str_end}
+      str char_start = *char_curr
+
+      while (
+            ((**char_curr != '\n') and (*char_curr).compare(str_end, str_end.length()))
+         or
+            (chr_escaped(*char_curr) and not (*char_curr).compare(str_end, str_end.length()))
+      )
+         ++(*char_curr)
+
+      *char_curr += str_end.length() - 1
+
+      return Token(string, char_start, *char_curr, line)
+
+   Token word {str* char_curr, u32 line}
+      str char_start = *char_curr
+
+      while (**char_curr).is_alphanumeric() : (*char_curr)++
+      (*char_curr)--
+
+      return Token(word, char_start, *char_curr + 1, line)
+
+   str to_str {Token self}
+
+      return (
+         match .type
+            none     : "0"
+            indent   : "i"
+            dedent   : "d"
+            newline  : "|"
+            word     : "w"
+            number   : "n"
+            string   : "s"
+            symbol   : "$"
+                     : "?") + ":" + .from.sub(to)
+
+
+template {match <expression:exp> <nl> (<expression:case> ":" <expression:body>*)}
+   ({any val = exp; switch (val) { (case <case>: val = <body>; break;*) }; val;})
+
