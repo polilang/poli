@@ -1,0 +1,221 @@
+###
+   Poli language redefinition
+###
+
+
+
+# --- type system
+
+# declaration, 'mut' for 'mutable', everything is immutable by default
+mut i32:someint = 123 * (123 + 321)
+
+# multivar declaration
+mut i32:
+   other
+   smthelse = someint
+
+# pointers and addressof
+[i32]:
+   imut_p_imut_someint = @someint
+
+[mut i32]:
+   imut_p_mut_someint = @someint
+
+mut [mut i32]:
+   mut_p_mut_someint = @someint
+
+# dereferencing
+other = [p_someint]
+
+# arrays
+[i32, 5]:
+   Iint_Iarr = {1, 2, 3, 4, 5}
+
+[mut i32, 5]:
+   Mint_Iarr = {1, 2, 3, 4, 5}
+
+mut [mut i32, 5]:
+   Mint_Marr = {1, 2, 3, 4, 5}
+
+# indexing
+someint = [Iint_Iarr, 1]
+
+# assigning to an element
+[Mint_Iarr, 0] = 10 # Mint_Iarr[0] = 10
+
+# casting
+smthelse = i32:2.5323231
+
+# serializing cast exploit
+[u8, 4]:bytes = [i08]:u32:1234356
+
+
+
+# --- functions
+
+# simplest example
+i64:sum (i32:a, i32:b)
+   return a + b
+
+# pointer param/return
+[i8]:next ([i8]:char)
+   return char + 1
+
+# call
+print(sum(123, 321)) # 444
+print(next("hello")) # h
+
+
+# --- classes/custom datatypes
+
+type i32Node
+   # default constructor just allocates the memory for the structure and initializes with defaults
+
+   # class members with defaults
+   [mut i32List]:
+      next = null
+      prev = null
+
+   i32:data = 0
+
+type i32Stack
+   [mut i32Node]:
+      head = null
+      tail = null
+
+   i32:length = 0
+
+
+   # all methods except the constructor have to take '[mut classname]:identifier' or 'self' as the first parameter
+   # 'self' can be used as a return type as well,
+   #    in which case it will match the class type and implicitly return the instance
+
+   self:push (self, i32:value)
+      [mut i32Node]:node = new(i32Node)
+      node.data = value
+
+      if not .head
+         .head = .tail = node
+
+      else
+         .tail.next = node
+         node.prev = .tail
+         .tail = node
+
+      .length += 1
+
+
+   i32:pop (self)
+      i32:value = .tail.data
+
+      .tail = .tail.prev
+      .length -= 1
+
+      del(.tail.next)
+
+      return value
+
+
+   i32:peek (self)
+      return .tail.data
+
+
+# usage
+mut i32Stack:stak
+
+print(stak.length) # 0
+
+stak.push(123)
+print(stak.length) # 1
+
+print(thing.stak.peek()) # 123
+print(stak.length) # 1
+
+print(stak.pop())  # 123
+print(stak.length) # 0
+
+
+
+
+type u8 from extern:uint8_t
+type u32 from extern:uint32_t
+
+enum bool
+   false
+   true
+
+type str
+   u32: length
+   [u8]: string
+
+
+
+type vector
+
+   [mut any]: elements
+   u32: length
+
+   self: new ()
+      .elements = new(any:, 1)
+      .length = 0
+
+   self: new (u32: length)
+      .elements = new(any:, length)
+      .length = length
+
+   self: new ([any]: origin, u32: length)
+      .elements = new(any:, length)
+      .length = length
+      copy(.elements, origin, length - 1)
+
+
+   any: [] (self, u32: index)
+      if index >= .length
+         throw("index [{index}] out of bounds")
+
+      return [.elements, index]
+
+
+   void: []= (self, u32: index, any: expr)
+      if index >= .length
+         throw("index [{index}] out of bounds")
+
+      [.elements, index] = expr
+
+
+   self: slice (self, u32: start, u32: end)
+      return vector.new(elements + start, end - start + 1)
+
+
+   self: reverse (self)
+      self: reversed = vector.new()
+
+      for u32: i, range(.length-1, 0)
+         reversed.push([.elements, i])
+
+      return reversed
+
+
+   self: sort (self, [bool:(any:, any:)]: compare)
+      vector: sorted = vector.new(.length)
+      mut any: temp
+
+      for u32: i, range(.length)
+         for u32: j, range(i + 1, .length)
+            if compare([.elements, i], [.elements, j]) > 0
+
+               temp = [.elements, i]
+               [.sorted, i] = [.elements, j]
+               [.sorted, j] = temp
+
+      return sorted
+
+
+   str: (self)
+      str: ret = "vector:[" + str:[.elements]
+
+      for any:e, .elements + 1
+         ret += ", " + str:e and
+
+      ret += "]"
+      return ret

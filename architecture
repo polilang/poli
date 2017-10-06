@@ -1,0 +1,86 @@
+POLI
+
+
+
+struct Compiler
+   char **source
+   unsigned current_line
+
+   vector(Token*) tokens
+
+   vector(Token*) symbols
+   vector(Node*) tree
+
+
+
+TOKENIZER
+
+	struct Lexeme
+		unsigned line
+		char *start, *end, *string
+
+	struct Token
+		struct Lexeme lexeme
+		enum token_type type
+
+   enum token_type
+		STRING
+		NUMBER
+		WORD
+		SYMBOL
+		INDENT
+		DEDENT
+		NEWLINE
+
+	FUNCTIONS
+		tokenize
+		string
+		number
+		word
+		symbol
+		newline
+		indent
+		dedent
+		rm_comments
+
+
+
+PARSER
+
+	struct Node
+		char *name
+		vector(Token*) tokens
+		Node *left, *right
+
+	FUNCTIONS
+		check
+		match
+		parse
+		operand
+		operator
+		expression
+		declare
+		declare_function
+		call_function
+		cast
+		chunk
+		statement
+
+
+
+INSPECTOR
+
+
+
+TRANSLATOR
+
+	FUNCTIONS
+		translate
+		operand
+		operator
+		expression
+		declare
+		declare_function
+		call_function
+		cast
+		statement

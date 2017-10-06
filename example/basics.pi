@@ -1,0 +1,33 @@
+#
+#  Basics for parser
+#
+
+
+mut i32:varA  # declaration
+varA = 10 # assignment
+
+i32:varB = 11 # initialize
+
+if varA == 10
+   print("var is 10")
+
+# declaration
+i32:foo ()
+
+# implementation
+i32:foo ()
+   return 5
+
+# both
+i32:bar ()
+   return 100
+
+# with arguments
+u32:sum (u32:a, u32:b)
+   return a + b
+
+
+# while loop
+while varA > 10
+   varA -= 1
+
