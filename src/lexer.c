@@ -18,8 +18,10 @@ struct Compiler
 {
    char **source;
 
-   unsigned curr_line;
-   unsigned curr_char;
+   unsigned
+      curr_line,
+      curr_char,
+      curr_indent;
 
    struct
    {
@@ -265,29 +267,20 @@ unsigned line_end (char *line)
 
 vector(Token) tokenize (struct Compiler *context)
 {
+   rm_comments(context);
    context->tokens = v_new();
 
-   unsigned
-      indents[256] = {0},
-      *curr_indent = indents + 1;
-
-   char **sdelims = str_split(context->delimiter->string, " "); // string start/end delimiter pairs
-
-
-   rm_comments(context);
-
-
-   for (unsigned line = 0; source[line]; line++)
+   for (context->curr_line = 0; context->source[context->curr_line]; context->curr_line++)
    {
-      *curr_indent = get_indent(source[line]);
+      context->curr_indent = get_indent(context);
 
-      if (*curr_indent != curr_indent[-1] && !line_end(source[line] + *curr_indent))
+      if (context->curr_indent[0] != context->curr_indent[-1]
+      && !line_end(context->source[context->curr_line] + context->curr_indent[0]))
       {
-         if (*curr_indent > curr_indent[-1])
+         if (context->curr_indent[0] > context->curr_indent[-1])
          {
-            tk_curr = tk_indent(line);
-            curr_indent = curr_indent+1;
-            tk_prev = tk_link(tk_prev, tk_curr);
+            v_push(context->tokens, tk_indent(context));
+            context->curr_indent++;
          }
 
          else
@@ -340,7 +333,7 @@ char* ttype (enum token_type t)
       case STRING : return "s";
       case SYMBOL : return "$";
 
-      default        : return "?";
+      default     : return "?";
    }
 }
 /*

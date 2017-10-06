@@ -20,11 +20,15 @@ int main ()
 {
    vector(struct pair) v = v_new();
 
-   v_push(v, {1, 1}, {2, 3}, {3, 4});
-   v_push(v, {4, 5}, {6, 7}, {8, 9});
+   v_push(v, {1, 1}, {2, 2}, {3, 3});
+   v_push(v, {4, 4}, {5, 5}, {6, 6});
+   v_push(v, {1, 1});
 
-   for (unsigned i = 0; i < v_size(v); i++)
-      printf("%li:%li ", v[i].a, v[i].b);
+   while (1)
+   {
+      struct pair p = v_pop(v);
+      printf("%li:%li ", p.a, p.b);
+   }
 
    puts("hello !");
 }

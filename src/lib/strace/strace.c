@@ -70,11 +70,7 @@ void st_trace ()
          if (!skip)
             printf("\n      in %s:%d\n", entry->file, entry->line);
       }
-
-      else
-         printf("   \033[1;32mmain()\033[0m \n");
    }
-
 }
 
 
@@ -96,6 +92,9 @@ void st_push (char *file, char *call, unsigned line)
 void st_pop ()
 {
    ST.curr--;
+   for (int i=0; ST.entry[ST.curr].file[i]; i++) ST.entry[ST.curr].file[i] = 0;
+   for (int i=0; ST.entry[ST.curr].call[i]; i++) ST.entry[ST.curr].call[i] = 0;
+   ST.entry[ST.curr].line = 0;
 }
 
 

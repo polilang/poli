@@ -10,6 +10,15 @@
 
 
 
+#undef st_trace
+#undef st_push
+#undef st_pop
+#undef st_push_frame
+#undef st_drop
+#undef st_call
+
+
+
 void st_trace ();
 
 void st_push (char *file, char *call, unsigned line);
