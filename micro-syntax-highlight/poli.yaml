@@ -1,0 +1,73 @@
+filetype: Poli
+
+detect:
+   filename: "(\\.pi)$"
+
+rules:
+   #includes
+   - statement: "\\b(with|from)\\b"
+
+   #flow control
+   - statement: "\\b(while|if|then|elif|else|return|continue|break|for|in)\\b"
+
+   #dot (member) operator
+   - identifier: "(\\w*?\\.\\w+)"
+
+   - constant.bool: "\\b(false|null|true)\\b"
+
+   - constant.number: "\\b([0-9\\.]+)\\b"
+
+   #method calls
+   - special: "(\\.\\w+?)+?\\("
+   #function calls
+   - special: "\\w+?\\("
+
+   #structs
+   - identifier: "\\A\\b(\\S+?)\\b\\:"
+
+   #method define
+   - identifier.function: "(:\\w+!?)(\\w*)(\\s*\\()"
+
+   #parens, braces, brackets
+   - special: "[()\\{\\}\\[\\]]"
+
+   #types/casting
+   - type: "\\w+:"
+   - type: "\\[+?(mut\\s)?\\w+(,.+?)?\\]+?:"
+   #function pointer
+   - type: "\\[\\w+:\\((\\w+:\\s*(,\\s*\\w+:)*)\\)\\]:"
+
+   #class stuff
+   - statement: "\\b(type|enum)\\b"
+   - type: "\\b(self)\\b"
+
+   #mutability modifier
+   - special: "\\b(mut)\\b"
+
+   - symbol: "\\b(not|and|or)\\b"
+
+   - special: "(->|\\.\\.\\.|\\?|\\@)"
+
+   - symbol: "(\\*|/|%|\\+|-|\\^|>|<|=|!|,|;)"
+
+   - constant.string:
+      start: \"
+      end: \"
+      skip: "\\\\\\\\|\\\\\\\""
+      rules:
+         - special: "\\\\(\\\"|\\\\)"
+         - preproc: "\\{.+?\\}"
+         - special: "\\\\[0-9a-fA-F]+"
+
+   - preproc: "\\b(template)\\b"
+
+   - comment:
+       start: "\\#"
+       end: "$"
+       rules: []
+
+   - comment:
+      start: "\\s*(###)"
+      end: "(###)"
+      rules: []
+
