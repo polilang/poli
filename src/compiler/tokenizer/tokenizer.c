@@ -120,7 +120,9 @@ Token String (Compiler *c)
          )
       end++;
 
-   return token(c, STRING, end-start);
+   Token s = token(c, STRING, end-start);
+   c->curr_char++; // shift past last quote
+   return s;
 }
 
 
