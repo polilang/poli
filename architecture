@@ -3,11 +3,11 @@ POLI
 
 
 struct Compiler
-   char **source
-   unsigned current_line
+   char *curr_char
+   unsigned line
 
+   vector(char*) source
    vector(Token*) tokens
-
    vector(Token*) symbols
    vector(Node*) tree
 
@@ -41,7 +41,6 @@ TOKENIZER
 		newline
 		indent
 		dedent
-		rm_comments
 
 
 

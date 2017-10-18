@@ -10,6 +10,10 @@
 
 
 
+#include <stdlib.h>
+
+
+
 static const unsigned gm_manager_lock = 0; // default lock global
 
 // create a garbage managed scope
@@ -46,7 +50,7 @@ void* gexport  (void* ptr);
 // garbage managed main redefinition
 int __managed_main__();
 #define main(...) \
-   main (int argc, char* argv[]) {gm_push(); __managed_main__(argc, argv); gm_purge();} \
+   main (int argc, char* argv[]) {gm_push(); atexit(gm_purge); return __managed_main__(argc, argv);} \
    int __managed_main__(__VA_ARGS__)
 
 
@@ -59,8 +63,8 @@ int __managed_main__();
 
 
 // return redefinition to work in conjunction with scope macros
-#define greturn(...) \
-   {if (gm_manager_lock) gm_pop(); return __VA_ARGS__;}
+#define greturn(ret) \
+   ({__typeof__(ret) r = ret; if (gm_manager_lock) gm_pop(); return r;})
 
 
 

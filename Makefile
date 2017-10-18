@@ -1,15 +1,16 @@
-SRC := src
-LIB := $(SRC)/lib
-MAIN := $(SRC)/parser.c
+SOURCE := src
+LIBRARIES := $(SOURCE)/lib
+COMPILER := $(SOURCE)/compiler
+MAIN := $(SOURCE)/main.c
 
 CC := cc
-CFLAGS := -Wall -I$(LIB) -g
+CFLAGS := -Wall -I$(SOURCE) -g
 
 OUT := build
 EXE := $(OUT)/main
 
-SOURCES := $(wildcard $(LIB)/*/*.c) $(MAIN)
-TARGETS := $(addprefix $(OUT)/,$(subst $(LIB)/,,$(SOURCES:.c=.o)))
+SOURCES := $(wildcard $(LIBRARIES)/*/*.c) $(wildcard $(COMPILER)/*/*.c) $(MAIN)
+TARGETS := $(addprefix $(OUT)/,$(subst $(LIBRARIES)/,,$(subst $(COMPILER)/,,$(SOURCES:.c=.o))))
 DIRS := $(OUT) $(dir $(TARGETS))
 
 all : $(EXE)
@@ -17,7 +18,10 @@ all : $(EXE)
 $(OUT)/%.o : %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(OUT)/%.o : $(LIB)/%.c
+$(OUT)/%.o : $(LIBRARIES)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OUT)/%.o : $(COMPILER)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(EXE) : $(DIRS) $(TARGETS)

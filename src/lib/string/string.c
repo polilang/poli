@@ -13,8 +13,8 @@
 #include <stdio.h>   // vsprintf
 #include <stdarg.h>  // va_list, va_start, va_end
 
-#include "garbage/gm.h"      // galloc, gfree, gregalloc
-#include "fpow10/fpow10.h"  // fast 10 powers
+#include "lib/garbage/gm.h"      // galloc, gfree, gregalloc
+#include "lib/fpow10/fpow10.h"  // fast 10 powers
 #include "string.h"
 
 
@@ -465,6 +465,11 @@ char* str_slicep (char* from, char* to)
    }
 
    return ret;
+}
+
+char* str_slicel (char* from, long l)
+{
+   return str_slicep(from, from+l);
 }
 
 

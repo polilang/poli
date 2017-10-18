@@ -10,9 +10,9 @@
 
 
 
-#include "../strace/strace.h"
-#include "../except/except.h"
-#include "../garbage/gm.h"
+#include "lib/strace/strace.h"
+#include "lib/except/except.h"
+#include "lib/garbage/gm.h"
 
 
 
@@ -35,28 +35,28 @@ void v_remove(unsigned index, unsigned esize, char **vector);
 #define v_new() st_call(v_new())
 
 
-#define v_insert(index, vector, ...) {\
+#define v_insert(index, vector, ...) ({\
    st_push(v_insert(index, vector, ##__VA_ARGS__));\
    assert(gm_ismanaged(((unsigned*)vector - 1)), VECTOR_INIT, #vector);\
    assert(index <= v_size(vector), VECTOR_INDEX, #vector, #index);\
    __typeof__(vector[0]) temp[] = {__VA_ARGS__};\
    v_insert(index, sizeof(vector[0]), sizeof(temp)/sizeof(vector[0]), (char**)&vector, (char*)temp);\
-   st_pop();}
+   st_pop();})
 
 
-#define v_push(vector, ...) {\
+#define v_push(vector, ...) ({\
    st_push(v_push(vector, ##__VA_ARGS__));\
    v_insert(v_size(vector), vector, ##__VA_ARGS__);\
-   st_pop();}
+   st_pop();})
 
 
-#define v_remove(vector, index) {\
+#define v_remove(vector, index) ({\
    st_push(v_remove(vector, index));\
    assert(gm_ismanaged(((unsigned*)vector - 1)), VECTOR_INIT, #vector);\
    assert(v_size(vector), VECTOR_EMPTY, #vector);\
    assert(index < v_size(vector), VECTOR_INDEX, #vector, #index);\
    v_remove(index, sizeof(vector[0]), (char**)&vector);\
-   st_pop();}
+   st_pop();})
 
 
 #define v_pop(vector) ({\

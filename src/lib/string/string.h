@@ -49,6 +49,7 @@ char* str_trimr  (char*);
 char* str_trim   (char*);
 char* str_slice  (char*, long from, long to);
 char* str_slicep (char* from, char* to);
+char* str_slicel (char* from, long length);
 char* str_splitl (char** last, char* delim);
 char** str_split (char*, char* delim);
 

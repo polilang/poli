@@ -8,9 +8,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "../strace/strace.h"
-#include "../except/except.h"
-#include "../garbage/gm.h"
+#include "lib/strace/strace.h"
+#include "lib/except/except.h"
+#include "lib/garbage/gm.h"
 
 
 

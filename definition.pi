@@ -1,7 +1,11 @@
 # all types except 'any' are defined in code
-type:
+typename:
    (.word | "any")
    "[" type "]"
+
+type:
+   typename ":"
+
 
 # token types are indicated with . (dot) prefix
 derefer:
@@ -11,17 +15,16 @@ atom:
    .word | .number | .string | derefer | func_call
 
 op_unary:
-   "not" | "-"
+   "not" | "-" | "~" | type #cast
 
 # symbols are taken by character because the lexer produces individual symbols not groups
-operator:
+op_binary:
    "."
-   "~"
    "*" | "/" | "%"
    "+" | "-"
-   "<""<" | ">"">"
-   ">" | "<" | ">""=" | "<""="
-   "=""=" | "!""="
+   "<<" | ">>"
+   ">" | "<" | ">=" | "<="
+   "==" | "!="
    "&"
    "^"
    "|"
@@ -29,7 +32,24 @@ operator:
    "or"
 
 op_assign:
-   "=" | "*""=" | "/""=" | "+""=" | "-""=" | "%""=" | "|""=" | "&""=" | "^""=" | ">"">""=" | "<""<""="
+   "=" | "*=" | "/=" | "+=" | "-=" | "%=" | "|=" | "&=" | "^=" | ">>=" | "<<="
+
+precedence:
+   "."   #member access
+   "[]"  #dereference
+   op_unary
+   "*" | "/" | "%"
+   "+" | "-"
+   "<<" | ">>" # bitwise shift
+   ">" | "<" | ">=" | "<="
+   "==" | "!="
+   "&"   #bitwise and
+   "^"   #bitwise xor
+   "|"   #bitwise or
+   "and"
+   "or"
+   op_assign
+
 
 expr:
    op_unary? atom (operator expr)?
@@ -37,16 +57,16 @@ expr:
    "(" assign ")"
 
 declare:
-   type ":" .word op_assign expr
+   type .word op_assign expr
 
 assign:
    .word op_assign expr
 
 if:
-   "if" expr .newline .indent chunk .dedent ("elif" expr .newline .indent chunk .dedent)* ("else" .newline .indent chunk .dedent)?
+   "if" expr chunk ("elif" expr chunk)* ("else" chunk)?
 
 while:
-   "while" expr .newline .indent chunk .dedent
+   "while" expr chunk
 
 break:
    "break"
@@ -56,13 +76,13 @@ continue:
 
 
 params:
-   "(" ( type ":" .word ("," type ":" .word)* )? ")"
+   "(" ( type .word ("," type .word)* )? ")"
 
 args:
    "(" ( expr ("," expr)* )? ")"
 
 func_def:
-   type ":" .word params .newline .indent chunk .dedent
+   type .word params chunk
 
 func_call:
    .word args
@@ -71,8 +91,16 @@ return:
    "return" expr?
 
 statement:
-   assign | if | while | break | continue | func_call | return
+   assign
+   if
+   while
+   break
+   continue
+   func_call
+   return
 
 chunk:
-   statement (.newline statement)*
+   .newline .indent statement (.newline statement)* .dedent
 
+program:
+   statement (.newline statement)*
