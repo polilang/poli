@@ -8,9 +8,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "lib/strace/strace.h"
-#include "lib/except/except.h"
-#include "lib/garbage/gm.h"
+#include "strace/strace.h"
+#include "except/except.h"
+#include "garbage/gm.h"
 
 
 
@@ -55,7 +55,7 @@ void* v_new ()
 void v_insert(unsigned index, unsigned esize, unsigned ecount, char **vector, char *e)
 {
    *vector = V_DATAP(
-      grealloc(V_REALP(*vector), sizeof(unsigned) + esize * (*V_REALP(*vector) + ecount + 1))
+      grealloc(V_REALP(*vector), sizeof(unsigned) + esize * (*V_REALP(*vector) + ecount +1) )
    );
 
    for (unsigned i = index; i < v_size(*vector); i++)
@@ -68,6 +68,7 @@ void v_insert(unsigned index, unsigned esize, unsigned ecount, char **vector, ch
       for (unsigned b = 0; b < esize; b++)
          (*vector)[(i + index) * esize + b] = e[i * esize + b];
 }
+
 
 void v_remove(unsigned index, unsigned esize, char **vector)
 {

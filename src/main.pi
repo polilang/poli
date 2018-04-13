@@ -1,0 +1,7 @@
+with c::stdio
+
+main:
+{
+   printf("hello")
+}
+

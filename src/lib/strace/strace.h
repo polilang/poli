@@ -39,8 +39,18 @@ suggested use:
    {
       body...
    }
+
+   //void function
+   void foo (args...)
+   #define foo(...) st_call(foo(__VA_ARGS__), void)
+   {
+      body...
+   }
 */
-#define st_call(fn) ({ st_push(fn); __typeof__(fn) r = fn; st_pop(); r;})
+
+#define st_call_void(fn) ({ st_push(fn); fn; st_pop();})
+#define st_call_(fn) ({ st_push(fn); __typeof__(fn) r = fn; st_pop(); r;})
+#define st_call(fn, ...) st_call_##__VA_ARGS__(fn)
 
 
 

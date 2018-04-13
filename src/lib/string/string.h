@@ -10,50 +10,54 @@
 
 
 
-int chr_isalpha (char);
-int chr_isdigit (char);
-int chr_isalnum (char);
-int chr_iswhite (char);
+int chr_isalpha (const char);
+int chr_isdigit (const char);
+int chr_isalnum (const char);
+int chr_iswhite (const char);
 
-unsigned str_length (char*);
-char*    str_new    (char*);
+int str_isupper (const char*);
+int str_islower (const char*);
 
-char* str_lower (char*);
-char* str_upper (char*);
+unsigned str_length (const char*);
+char*    str_new    (const char*);
 
-int str_equal    (char*, char*);
-int str_comparen (char*, char*, int len); // 0 on equal
-int str_compare  (char*, char*);          // 0 on equal
+char* str_lower (const char*);
+char* str_upper (const char*);
 
-long  str_find      (char* in, char* what); //  -1  on fail
-char* str_pfind     (char* in, char* what); // NULL on fail
-long  str_findc     (char* in, char* what); //  -1  on fail
-char* str_pfindc    (char* in, char* what); // NULL on fail
-char* str_plast     (char* in, char* what); // NULL on fail
-long  str_last      (char* in, char* what); //  -1  on fail
-unsigned str_occurs (char* in, char* what);
+int str_equal    (const char*, const char*);
+int str_comparen (const char*, const char*, int len); // 0 on equal
+int str_compare  (const char*, const char*);          // 0 on equal
 
-char* str_from_fmt   (char* fmt, ...);
+long  str_find      (const char* in, const char* what); //  -1  on fail
+char* str_pfind     (const char* in, const char* what); // NULL on fail
+long  str_findc     (const char* in, const char* what); //  -1  on fail
+char* str_pfindc    (const char* in, const char* what); // NULL on fail
+char* str_plast     (const char* in, const char* what); // NULL on fail
+long  str_last      (const char* in, const char* what); //  -1  on fail
+unsigned str_occurs (const char* in, const char* what);
+
+char* str_from_fmt   (const char* fmt, ...);
 char* str_from_i     (long);
 char* str_from_u     (unsigned long);
 char* str_from_f     (double);
-long  str_to_i       (char*);
-unsigned long str_to_u (char*);
-double str_to_f      (char*);
+long  str_to_i       (const char*);
+unsigned long str_to_u (const char*);
+double str_to_f      (const char*);
 
-char* str_concat (char*, char*);
-char* str_extend (char*, char*);
+char* str_concat (const char*, const char*);
+char* str_extend (char*, const char*);
+char* str_join   (const char**);
 
-char* str_triml  (char*);
-char* str_trimr  (char*);
-char* str_trim   (char*);
-char* str_slice  (char*, long from, long to);
-char* str_slicep (char* from, char* to);
-char* str_slicel (char* from, long length);
-char* str_splitl (char** last, char* delim);
-char** str_split (char*, char* delim);
+char* str_triml  (const char*);
+char* str_trimr  (const char*);
+char* str_trim   (const char*);
+char* str_slice  (const char*, long from, long to);
+char* str_slicep (const char* from, const char* to);
+char* str_slicel (const char* from, long length);
+char* str_splitl (const char** last, const char* delim);
+char** str_split (const char*, const char* delim);
 
-char* str_format (char*, ...);
+char* str_format (const char*, ...);
 
 
 

@@ -10,9 +10,9 @@
 
 
 
-#include "lib/strace/strace.h"
-#include "lib/except/except.h"
-#include "lib/garbage/gm.h"
+#include "strace/strace.h"
+#include "except/except.h"
+#include "garbage/gm.h"
 
 
 
@@ -67,6 +67,12 @@ void v_remove(unsigned index, unsigned esize, char **vector);
    st_pop();\
    temp;})
 
+
+#define v_free(vector) ({\
+   st_push(v_free(vector));\
+   assert(gm_ismanaged(((unsigned*)vector - 1)), VECTOR_INIT, #vector);\
+   gfree(((unsigned*)vector - 1));\
+   st_pop();})
 
 
 #endif

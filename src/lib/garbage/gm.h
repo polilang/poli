@@ -62,7 +62,7 @@ int __managed_main__();
    if (gm_manager_lock) gm_pop();
 
 
-// return redefinition to work in conjunction with scope macros
+// return function that returns from inside a managed function
 #define greturn(ret) \
    ({__typeof__(ret) r = ret; if (gm_manager_lock) gm_pop(); return r;})
 

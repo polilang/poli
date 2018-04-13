@@ -1,0 +1,163 @@
+with c::string::string
+with c::vector::vector
+
+
+
+TokenType: enum
+{
+   Word Number Symbol
+   Space Tab
+   Indent Dedent Newline
+}
+
+TokenType: impl
+{
+   from_str: (str: [char]) -> Self
+   {
+      if str::equal(str, "number") { return TokenType::Number  }
+      if str::equal(str, "word")   { return TokenType::Word    }
+      if str::equal(str, "symbol") { return TokenType::Symbol  }
+
+      if str::equal(str, "space")  { return TokenType::Space   }
+      if str::equal(str, "tab")    { return TokenType::Tab     }
+
+      if str::equal(str, "indent") { return TokenType::Indent  }
+      if str::equal(str, "dedent") { return TokenType::Dedent  }
+      if str::equal(str, "newline"){ return TokenType::Newline }
+   }
+
+   to_str: (self: Self) -> [char]
+   {
+      match self
+      {
+         TokenType::Word   { return "word"    }
+         TokenType::Number { return "number"  }
+         TokenType::Symbol { return "symbol"  }
+
+         TokenType::Space  { return "space"   }
+         TokenType::Tab    { return "tab"     }
+
+         TokenType::Indent { return "indent"  }
+         TokenType::Dedent { return "dedent"  }
+         TokenType::Newline{ return "newline" }
+      }
+   }
+}
+
+
+
+Token: type
+{
+    type: TokenType
+    from: [char]
+    len:  long
+    line: long
+}
+
+
+Token: impl
+{
+   Word: (source: [mut [char]], line: int) -> Self
+   {
+      start := [source]
+
+      loop
+      {
+         if not chr::isalpha([[source]]) { break }
+         [source] += 1
+      }
+
+      return { TokenType::Word, start, [source]-start, line }:Self
+   }
+
+   Number: (source: [mut [char]], line: int) -> Self
+   {
+      start := [source]
+
+      loop
+      {
+         if not chr::isdigit([[source]]) { break }
+         [source] += 1
+      }
+
+      return { TokenType::Word, start, [source]-start, line }:Self
+   }
+
+   Symbol: (source: [mut [char]], line: int) -> Self
+   {
+      return { TokenType::Symbol, [source], 1, line }:Self
+   }
+
+   Newline: (source: [mut [char]], line: int) -> Self
+   {
+      return { TokenType::Newline, [source], 1, line }:Self
+   }
+
+   Indent: (source: [mut [char]], line: int) -> Self
+   {
+      return { TokenType::Indent, [source], 1, line }:Self
+   }
+
+   Dedent: (source: [mut [char]], line: int) -> Self
+   {
+      return { TokenType::Dedent, [source], 1, line }:Self
+   }
+
+   Tab: (source: [mut [char]], line: int) -> Self
+   {
+      return { TokenType::Tab, [source], 1, line }:Self
+   }
+
+   Space: (source: [mut [char]], line: int) -> Self
+   {
+      return { TokenType::Space, [source], 1, line }:Self
+   }
+}
+
+
+
+Tokenizer: type
+{
+   source:    [char]
+   stringd:  [[char]]
+   commentd: [[char]]
+}
+
+Tokenizer: impl
+{
+   tokenize: (source: mut [char], stringd: [mut [char]], commentd: [mut [char]]) -> [Token]
+   {
+      tokens: mut [mut Token] = v::new()
+      line: mut = 1
+
+      loop
+      {
+         if not [source] { break }
+
+         if chr::isalpha([source])
+         {
+            v::push(tokens, Token::Word(@mut source, line))
+         }
+
+         else if chr::isdigit([source])
+         { v::push(tokens, Token::Number(@mut source, line)) }
+
+         else if [source] == '\n'
+         {
+            line += 1
+            v::push(tokens, Token::Newline(@mut source, line))
+         }
+
+         else if [source] == '\t'
+         { v::push(tokens, Token::Tab(@mut source, line)) }
+
+         else if [source] == [" "]
+         { v::push(tokens, Token::Space(@mut source, line)) }
+
+         else
+         { v::push(tokens, Token::Symbol(@mut source, line)) }
+      }
+
+      return tokens
+   }
+}

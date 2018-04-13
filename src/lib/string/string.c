@@ -13,35 +13,34 @@
 #include <stdio.h>   // vsprintf
 #include <stdarg.h>  // va_list, va_start, va_end
 
-#include "lib/garbage/gm.h"      // galloc, gfree, gregalloc
-#include "lib/fpow10/fpow10.h"  // fast 10 powers
+#include "garbage/gm.h"      // galloc, gfree, gregalloc
+#include "fpow10/fpow10.h"  // fast 10 powers
 #include "string.h"
 
 
 
-int chr_isalpha (char c)
+int chr_isalpha (const char c)
 {
    return ((c >= 'a') && (c <= 'z'))
-       || ((c >= 'A') && (c <= 'Z'))
-       || (c == '_');
+       || ((c >= 'A') && (c <= 'Z'));
 }
 
 
-int chr_isdigit (char c)
+int chr_isdigit (const char c)
 {
    return (c >= '0')
        && (c <= '9');
 }
 
 
-int chr_isalnum (char c)
+int chr_isalnum (const char c)
 {
    return chr_isdigit(c)
        || chr_isalpha(c);
 }
 
 
-int chr_iswhite (char c)
+int chr_iswhite (const char c)
 {
    return c == ' '
        || c == '\t'
@@ -50,31 +49,44 @@ int chr_iswhite (char c)
 }
 
 
+int str_islower (const char* s)
+{
+   while (*s) if (*s < 'a' || *s > 'z') return 0; else s++;
+   return 1;
+}
 
-unsigned str_length (char* s)
+
+int str_isupper (const char* s)
+{
+   while (*s) if (*s < 'A' || *s > 'Z') return 0; else s++;
+   return 1;
+}
+
+
+
+unsigned str_length (const char* s)
 {
    unsigned len = 0;
-   if (s)
-      while (s[len] != 0) len++;
+   while (s[len]) len++;
    return len;
 }
 
 
-char* str_new (char* s) //char* constructor
+char* str_new (const char* s) //char* constructor
 {
    char* mem = galloc(str_length(s) + 1);
-   for (unsigned i = 0; i < str_length(s) + 1; i++) mem[i] = s[i];
+   for (unsigned i = 0; i <= str_length(s); i++) mem[i] = s[i];
    return mem;
 }
 
 
-char* str_lower (char* s)
+char* str_lower (const char* s)
 {
    char* ret = galloc(str_length(s) + 1);
 
    for (unsigned i = 0; i <= str_length(s); i++)
 
-      if (s[i] >= 0x41 && s[i] <= 0x5A)
+      if (s[i] >= 'A' && s[i] <= 'Z')
          ret[i] = s[i] + 0x20;
 
       else
@@ -84,13 +96,13 @@ char* str_lower (char* s)
 }
 
 
-char* str_upper (char* s)
+char* str_upper (const char* s)
 {
    char* ret = galloc(str_length(s) + 1);
 
    for (unsigned i = 0; i <= str_length(s); i++)
 
-      if (s[i] >= 0x61 && s[i] <= 0x7A)
+      if (s[i] >= 'a' && s[i] <= 'z')
          ret[i] = s[i] - 0x20;
 
       else
@@ -100,7 +112,7 @@ char* str_upper (char* s)
 }
 
 
-int str_equal (char* a, char* b)
+int str_equal (const char* a, const char* b)
 {
    if (a && b && *a && *b)
       if (str_length(a) == str_length(b))
@@ -116,7 +128,7 @@ int str_equal (char* a, char* b)
 }
 
 
-int str_comparen (char* a, char* b, int len)
+int str_comparen (const char* a, const char* b, int len)
 {
    if (a && b)
    {
@@ -132,7 +144,7 @@ int str_comparen (char* a, char* b, int len)
 }
 
 
-int str_compare (char* a, char* b)
+int str_compare (const char* a, const char* b)
 {
    return str_comparen(a, b, str_length(b)+1);
 }
@@ -140,12 +152,12 @@ int str_compare (char* a, char* b)
 
 // find first occurrence of a string in string
 // return index
-long str_find (char* in, char* what)
+long str_find (const char* in, const char* what)
 {
    if (in && what && *in && *what)
    {
       unsigned l_what = str_length(what),
-          l_in   = str_length(in);
+               l_in   = str_length(in);
 
       if (l_in >= l_what) //string has to be >= than the slice to be found
          for (unsigned i = 0; i < l_in; i++)
@@ -160,12 +172,12 @@ long str_find (char* in, char* what)
 
 // find first occurrence of a string in string
 // return pointer
-char* str_pfind (char* in, char* what)
+char* str_pfind (const char* in, const char* what)
 {
    long index = str_find(in, what);
 
    if (index != -1)
-      return in + index;
+      return (char*)in + index;
 
    return NULL;
 }
@@ -173,7 +185,7 @@ char* str_pfind (char* in, char* what)
 
 // find first occurrence of characters in string
 // return index
-long str_findc (char* in, char* what)
+long str_findc (const char* in, const char* what)
 {
    if (*in && *what)
    {
@@ -194,29 +206,29 @@ long str_findc (char* in, char* what)
 
 // find first occurrence of characters in string
 // return pointer
-char* str_pfindc (char* in, char* what)
+char* str_pfindc (const char* in, const char* what)
 {
    long index = str_findc(in, what);
 
    if (index != -1)
-      return in + index;
+      return (char*)in + index;
 
    return NULL;
 }
 
 
-char* str_plast (char* in, char* what)
+char* str_plast (const char* in, const char* what)
 {
-   char *last = in, *found = NULL;
+   const char *last = in, *found = NULL;
 
    while ((found = str_pfind(last, what)))
       last = found + 1;
 
-   return last != in ? last-1 : NULL;
+   return last != in ? (char*)last-1 : NULL;
 }
 
 
-long str_last (char* in, char* what)
+long str_last (const char* in, const char* what)
 {
    char* found = str_plast(in, what);
    return found ? found - in : -1;
@@ -224,7 +236,7 @@ long str_last (char* in, char* what)
 
 
 // count occurrences of a substring
-unsigned str_occurs (char* in, char* what)
+unsigned str_occurs (const char* in, const char* what)
 {
    unsigned i = 0; in--;
    while ((in = str_pfind(in + 1, what))) i++;
@@ -232,7 +244,7 @@ unsigned str_occurs (char* in, char* what)
 }
 
 
-char* str_from_fmt (char* fmt, ...)
+char* str_from_fmt (const char* fmt, ...)
 {
    va_list arg; va_start(arg, fmt);
 
@@ -274,7 +286,7 @@ char* str_from_f (double v)
 }
 
 
-long str_to_i (char* s)
+long str_to_i (const char* s)
 {
    long final = 0, sign = 1, mult = 1;
 
@@ -296,13 +308,13 @@ long str_to_i (char* s)
 }
 
 
-unsigned long str_to_u (char* s)
+unsigned long str_to_u (const char* s)
 {
    return str_to_i(s);
 }
 
 
-double str_to_f (char* s)
+double str_to_f (const char* s)
 {
    double sign = 1.0;
 
@@ -312,9 +324,9 @@ double str_to_f (char* s)
       case '+': s++;
    }
 
-   char* position_of_point = str_pfindc(s, ".,");
-   char* strend = s + str_length(s);
-   char* next_point;
+   const char* position_of_point = str_pfindc(s, ".,");
+   const char* strend = s + str_length(s);
+   const char* next_point;
 
    if ((next_point = position_of_point ? str_pfindc(position_of_point+1, ".,"): NULL))
       strend = next_point;
@@ -324,7 +336,7 @@ double str_to_f (char* s)
    double factor = fpow10(-decimal_places);
    double total = 0.0;
 
-   for (char* it = strend; it > s;)
+   for (const char* it = strend; it > s;)
    {
       if (--it == position_of_point) continue;
 
@@ -336,7 +348,7 @@ double str_to_f (char* s)
 }
 
 
-char* str_concat (char* a, char* b)
+char* str_concat (const char* a, const char* b)
 {
    long len = str_length(a) + str_length(b),
        off = 0;
@@ -353,10 +365,10 @@ char* str_concat (char* a, char* b)
 }
 
 
-char* str_extend (char* a, char* b)
+char* str_extend (char* a, const char* b)
 {
    long len = str_length(a) + str_length(b),
-       off = str_length(a);
+        off = str_length(a);
 
    if (len < 0) return NULL; // strings are too long / overflow
 
@@ -369,7 +381,15 @@ char* str_extend (char* a, char* b)
 }
 
 
-char* str_triml (char* s) // trim whitespace from left side
+char* str_join(const char** list)
+{
+   char* str = str_new("");
+   for (; *list; list++) str = str_extend(str, *list);
+   return str;
+}
+
+
+char* str_triml (const char* s) // trim whitespace from left side
 {
    // trim forward
    while (chr_iswhite(*s)) s++;
@@ -377,7 +397,7 @@ char* str_triml (char* s) // trim whitespace from left side
 }
 
 
-char* str_trimr (char* s) // trim whitespace from right side
+char* str_trimr (const char* s) // trim whitespace from right side
 {
    char* result;
 
@@ -394,7 +414,7 @@ char* str_trimr (char* s) // trim whitespace from right side
 }
 
 
-char* str_trim (char* s) // trim whitespace from both sides
+char* str_trim (const char* s) // trim whitespace from both sides
 {
    char* result;
 
@@ -412,23 +432,22 @@ char* str_trim (char* s) // trim whitespace from both sides
 }
 
 
-char* str_format (char* s, ...)
+char* str_format (const char* s, ...)
 {
    va_list args; va_start(args, s);
 
-   char* result = galloc(str_length(s)*2 + 128);
+   char* result = galloc(str_length(s)*3 + 128);
    vsprintf(result, s, args);
-
-   va_end(args);
 
    char* ret = str_new(result);
    gfree(result);
 
+   va_end(args);
    return ret;
 }
 
 
-char* str_slice (char* s, long from, long to)
+char* str_slice (const char* s, long from, long to)
 {
    if (from < 0)              from = str_length(s) + from;
    if (from > str_length(s))  from = str_length(s);
@@ -448,7 +467,7 @@ char* str_slice (char* s, long from, long to)
    return ret;
 }
 
-char* str_slicep (char* from, char* to)
+char* str_slicep (const char* from, const char* to)
 {
    char* ret = NULL;
 
@@ -458,7 +477,7 @@ char* str_slicep (char* from, char* to)
    {
       ret = galloc(to - from + 1);
 
-      for (char* i = from; i < to; i++)
+      for (const char* i = from; i < to; i++)
          ret[i - from] = *i;
 
       ret[to - from] = 0;
@@ -467,13 +486,13 @@ char* str_slicep (char* from, char* to)
    return ret;
 }
 
-char* str_slicel (char* from, long l)
+char* str_slicel (const char* from, long l)
 {
    return str_slicep(from, from+l);
 }
 
 
-char* str_splitl (char **last, char *delim)
+char* str_splitl (const char **last, const char *delim)
 {
    char* ret = NULL;
 
@@ -488,15 +507,14 @@ char* str_splitl (char **last, char *delim)
 }
 
 
-char** str_split (char* s, char* delim)
+char** str_split (const char* s, const char* delim)
 {
    unsigned
       i = 0,
       o = str_occurs(s, delim) + 1;
 
-   char
-      **strings = galloc(sizeof(char*) * (o+1)),
-      *last = s;
+   char **strings = galloc(sizeof(const char*) * (o+1));
+   const char *last = s;
 
    while ((strings[i] = str_splitl(&last, delim))) i++;
 
